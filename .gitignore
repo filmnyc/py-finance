@@ -1,0 +1,16 @@
+**/__pycache__/
+accounts_edit.py
+test.py
+/venv
+setup.txt
+hold.txt
+items.txt
+test.py
+trans_old.py
+trans_old2.py
+/account_data
+/account_db
+/alembic
+/sqlalchemy
+models.pyc
+alembic.ini
