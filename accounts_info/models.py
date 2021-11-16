@@ -7,7 +7,6 @@ from sqlalchemy.types import TypeDecorator
 from sqlalchemy import DateTime as SdateTime
 from sqlalchemy.ext.declarative import declarative_base
 import time
-import pytz
 
 
 engine = create_engine('postgresql://myuser:mypass@localhost:5432/accounts', echo=False)

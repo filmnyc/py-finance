@@ -69,14 +69,15 @@ def account_menu(items):  # a=0, r=1
     print('Account menu')
     if items["account_len"] <= list_len:
         pass
-    if items["alter_list"] < items["account_len"]:
-        print(' Move down (d) ')
-    else:
-        pass
-    if items["alter_list"] >= items["account_len"]:
-        print(' Move up (u)')
-    else:
-        pass
+    else: 
+        if items["alter_list"] < items["account_len"]:
+            print(' Move down (d) ')
+        else:
+            pass
+        if items["alter_list"] >= items["account_len"]:
+            print(' Move up (u)')
+        else:
+            pass
     print(' Select (s) ')
     print(' Create (c)')
     print(' Delete (a)')
