@@ -15,10 +15,7 @@ def trans_act(selected_account, items):
     print()
     print('Enter amount for the ' + items[0])
     amount = currency('y')
-    if items[0] == 'Withdraw':
-        amount_show = '-{:.2f}'.format(float(amount))
-    else:
-        amount_show = '{:.2f}'.format(float(amount))
+    amount_show = '{:.2f}'.format(float(amount))
     trans_time = time.strftime('%m/%d/%Y')
     new_transaction = trans_time + ' ' + items[0] + ' - ' + amount_show
     print(new_transaction)
@@ -32,7 +29,7 @@ def trans_act(selected_account, items):
     add_comment = go_ahead('Add a comment to this transaction??')
     if add_comment == 'y':
         print()
-        rec_comment = input('Add comment:')
+        rec_comment = input('Add comment: ')
         print()
         print('The new transaction: ' + trans_time + ' ' + items[0] + ' - ' + amount_show + ' \"' + rec_comment + '\"')
     else:
@@ -40,6 +37,10 @@ def trans_act(selected_account, items):
         print('The new transaction: ' + trans_time + ' ' + items[0] + ' - ' + amount_show)
     old_balance = Transaction.query.with_entities(func.sum(Transaction.amount).filter(Transaction.account_id == selected_account).label('total')).first().total
     amount = float(amount)
+    if old_balance != None:
+        old_balance = float(old_balance)
+    else:
+        old_balance = 0.00
     if items[0] == 'Deposit':
         new_balance = old_balance + amount
     else:
