@@ -1,15 +1,10 @@
 import datetime
 from os import system
 import sys
-# from account_data.accounts_db import (
-#         account_listing, account_name, 
-#         account_balance, list_transactions, 
-#         transaction_list, update_transaction, 
-#         balance_update)
 from .transactional import trans_act
 from .account_fuctions import create_account, change_account
 from .transaction_edit import tedit_menu, edit_one, edit_two, edit_three, edit_four, edit_five
-from applets.applet import transaction_list, account_list
+from applets.applet import transaction_list, account_list, selector
 from .models import engine, Account, db_session, Transaction
 from sqlalchemy import func
 import json
@@ -18,47 +13,7 @@ import decimal, datetime
 list_len = 5
 
 
-
-
-# def account_list(items):
-#     print('\tAccount list')
-#     print()
-#     all_accounts_len = db_session.query(Account).count()
-#     if items["data_load"] == 're-load':
-#         if items["alter_list"] == list_len:
-#             trans_offset = 0
-#             e = 1
-#         else:
-#             if all_accounts_len < items["alter_list"]:
-#                 trans_offset = all_accounts_len - list_len  
-#                 e = trans_offset + 1
-#             elif all_accounts_len >= items["alter_list"]:
-#                 trans_offset = items["alter_list"] - list_len
-#                 e= trans_offset + 1
-# 
-#         account_data = engine.execute('select * from account order by id limit {} offset {};'.format(list_len, trans_offset))
-# 
-#         account_json = json.dumps([dict(r) for r in account_data])
-# 
-#         account_list_num = trans_offset + 1
-#         all_accounts_json = json.loads(account_json)
-#     else:
-#         account_list_num = items["account_num"]
-#         e = items["account_num"]
-#         all_accounts_json = items["accounts_json"]
-# 
-#     for account in all_accounts_json:
-#         account_amount = '{:.2f}'.format(float(account["balance"]))
-#         print(f'{e}) {account["name"]} {account_amount}')
-#         e = e + 1
-# 
-#     # items = {"data_load": "load", "account_len": items["account_len"], "accounts_json": all_accounts_json, "account_num": account_list_num, "alter_list": items["alter_list"]}
-#     items.update({"data_load": "load", "accounts_json": all_accounts_json, "account_num": account_list_num, "account_len": all_accounts_len})
-#     return items
-
-# print(items["accounts_len"])
-# items.update = ({"data_load": 'load'})
-def account_menu(items):  # a=0, r=1
+def account_menu(items):  
     system('clear')
     items = account_list(items)
     print()
@@ -69,7 +24,7 @@ def account_menu(items):  # a=0, r=1
     print('Account menu')
     if items["account_len"] <= list_len:
         pass
-    else: 
+    else:
         if items["alter_list"] < items["account_len"]:
             print(' Move down (d) ')
         else:
@@ -141,13 +96,21 @@ def account_select(items):
     # if items["message_opt"] == 'yes':
     #     print(items["message"])
     #     print()
-    low = items["account_num"] + 4
-    if items["menu_option"] == 'select':
-        print('Select Account (' + str(items["account_num"]) + ' - ' + str(low) + ')')
-    elif items["menu_option"] == 'delete':
-        print('Select Account to delete (' + str(items["account_num"]) + ' - ' + str(low) + ')')
-    else:
-        print('Select Account to edit (' + str(items["account_num"]) + ' - ' + str(low) + ')')
+    # if items["account_num"] < list_len:
+#    low = items["account_num"] + (list_len - 1)
+#    if items["menu_option"] == 'select':
+#        print('Select Account (' + str(items["account_num"]) + ' - ' + str(low)
+#                + ')')
+#    elif items["menu_option"] == 'delete':
+#        print('Select Account to delete (' + str(items["account_num"]) + ' - '
+#                + str(low) + ')')
+#    else:
+#        print('Select Account to edit (' + str(items["account_num"]) + ' - ' +
+#                str(low) + ')')
+
+    if items["account_num"] > 0:
+        select_string = selector(items, list_len)
+        print(select_string)
     print('Return (r):')
     print()
     select_account = input('Select account: ')

@@ -31,10 +31,20 @@ def transaction_list(selected_account, items):
                 trans_offset = (2 * list_len) + the_gap - list_len
                 e = trans_offset + 1
 
-        def alchemyencoder(obj):
-            """JSON encoder function for SQLAlchemy special classes."""
-            if isinstance(obj, datetime.date):
-                return obj.isoformat()
+def selector(items, list_len):
+    if items["account_num"] <= list_len:
+        select_string = (items["menu_option"] + ' account (' + str(1) + ' - ' +
+                        str(items["account_num"]) + ')')
+    else:
+        low = items["account_num"] + (list_len - 1)
+        select_string = (items["menu_option"] + ' account (' + str(items["account_num"]) 
+                        + ' - ' + str(low) + ')') 
+    return select_string
+
+def alchemyencoder(obj):
+    """JSON encoder function for SQLAlchemy special classes."""
+    if isinstance(obj, datetime.date):
+        return obj.isoformat()
 
         transaction_data = engine.execute('select * from transaction where account_id = {} order by cdate ASC limit {} offset {};'.format(selected_account, list_len, trans_offset))
 
