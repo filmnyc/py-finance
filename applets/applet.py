@@ -33,13 +33,16 @@ def transaction_list(selected_account, items):
 
 def selector(items, list_len):
     if items["account_num"] <= list_len:
-        select_string = (items["menu_option"] + ' account (' + str(1) + ' - ' +
-                        str(items["account_num"]) + ')')
+        str_left = 1
+        str_right = items["account_num"]
+        select_string = (items["menu_option"] + ' account (' + str(str_left) 
+                + ' - ' + str(items["account_num"]) + ')')
     else:
-        low = items["account_num"] + (list_len - 1)
-        select_string = (items["menu_option"] + ' account (' + str(items["account_num"]) 
-                        + ' - ' + str(low) + ')') 
-    return select_string
+        str_left = items["account_num"]
+        str_right = items["account_num"] + (list_len - 1)
+        select_string = (items["menu_option"] + ' account (' + 
+                str(items["account_num"]) + ' - ' + str(str_right) + ')') 
+    return select_string, str_left, str_right
 
 def alchemyencoder(obj):
     """JSON encoder function for SQLAlchemy special classes."""

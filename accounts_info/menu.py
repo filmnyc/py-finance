@@ -93,9 +93,9 @@ def account_select(items):
     system('clear')
     account_list(items)
     print()
-    # if items["message_opt"] == 'yes':
-    #     print(items["message"])
-    #     print()
+    if items["message_opt"] == 'yes':
+        print(items["message"])
+        print()
     # if items["account_num"] < list_len:
 #    low = items["account_num"] + (list_len - 1)
 #    if items["menu_option"] == 'select':
@@ -109,7 +109,7 @@ def account_select(items):
 #                str(low) + ')')
 
     if items["account_num"] > 0:
-        select_string = selector(items, list_len)
+        select_string, str_left, str_right = selector(items, list_len)
         print(select_string)
     print('Return (r):')
     print()
@@ -120,7 +120,7 @@ def account_select(items):
     elif select_account.isnumeric() == False:
         items.update({"message_opt": "yes", "message": "\"Submit a number or (r)\""})
         account_select(items)
-    elif int(select_account) < items["account_num"] or int(select_account) > low:
+    elif int(select_account) < str_left or int(select_account) > str_right:
         items.update({"message_opt": "yes", "message": "\"Submit number within range\""})
         account_select(items)
     else:
