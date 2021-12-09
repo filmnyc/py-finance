@@ -6,6 +6,12 @@ from accounts_info.models import engine, Account, db_session, Transaction
 
 list_len = 5
 
+def alchemyencoder(obj):
+    """JSON encoder function for SQLAlchemy special classes."""
+    if isinstance(obj, datetime.date):
+        return obj.isoformat()
+
+
 # List of transactions of the selected account
 # items = [action, account_name, account_balance, list_offset, transaction_len]
 def transaction_list(selected_account, items):
@@ -31,24 +37,6 @@ def transaction_list(selected_account, items):
                 trans_offset = (2 * list_len) + the_gap - list_len
                 e = trans_offset + 1
 
-def selector(items, list_len):
-    if items["account_num"] <= list_len:
-        str_left = 1
-        str_right = items["account_num"]
-        select_string = (items["menu_option"] + ' account (' + str(str_left) 
-                + ' - ' + str(items["account_num"]) + ')')
-    else:
-        str_left = items["account_num"]
-        str_right = items["account_num"] + (list_len - 1)
-        select_string = (items["menu_option"] + ' account (' + 
-                str(items["account_num"]) + ' - ' + str(str_right) + ')') 
-    return select_string, str_left, str_right
-
-def alchemyencoder(obj):
-    """JSON encoder function for SQLAlchemy special classes."""
-    if isinstance(obj, datetime.date):
-        return obj.isoformat()
-
         transaction_data = engine.execute('select * from transaction where account_id = {} order by cdate ASC limit {} offset {};'.format(selected_account, list_len, trans_offset))
 
         transaction_json = json.dumps([dict(r) for r in transaction_data], default=alchemyencoder)
@@ -66,6 +54,20 @@ def alchemyencoder(obj):
         e = e + 1
 
     return transaction_json, transaction_num
+
+
+def selector(items, list_len):
+    if items["account_num"] <= list_len:
+        str_left = 1
+        str_right = items["account_num"]
+        select_string = (items["menu_option"] + ' account (' + str(str_left) 
+                + ' - ' + str(items["account_num"]) + ')')
+    else:
+        str_left = items["account_num"]
+        str_right = items["account_num"] + (list_len - 1)
+        select_string = (items["menu_option"] + ' account (' + 
+                str(items["account_num"]) + ' - ' + str(str_right) + ')') 
+    return select_string, str_left, str_right
 
 # Check for "yes" or "no" action=comment(what you want to do), entity=on a variable, selectedname on object.
 def while_yn(action, entity, account_name):

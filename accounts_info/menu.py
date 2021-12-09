@@ -21,6 +21,14 @@ def account_menu(items):
         print(items["message"])
         print()
         items.update({"message_opt": "no", "message": " "})
+    if items["menu_option"] == 'menu':
+        pass
+    else:
+        the_account = account_select(items)
+        if the_account == 'menu':
+            items.update({"menu_option": "menu"})
+            account_menu(items)
+        if the_account == 'menu':
     print('Account menu')
     if items["account_len"] <= list_len:
         pass
@@ -61,13 +69,15 @@ def account_menu(items):
             account_menu(items)
     elif choice == 's':
         items.update({"menu_option": "select"})
-        the_account = account_select(items)
+        the_account = account_menu(items)
         if the_account == 're-select':
+            items({"menu_option": "menu"})
             account_menu(items)
     elif choice == 'c':
         items.update({"menu_option": "create"})
         the_account = create_account(items)
         if the_account == 'reject':
+            items({"menu_option": "menu"})
             account_menu(items)
         else:
             items.update({"data_load": "re-load"})
@@ -76,11 +86,13 @@ def account_menu(items):
         items.update({"menu_option": "delete"})
         the_account = account_select(items)
         if the_account == 're-select':
+            items({"menu_option": "menu"})
             account_menu(items)
     elif choice == 'e':
         items.update({"menu_option": "edit"})
-        the_account = account_select(items)
+        the_account = account_menu(items)
         if the_account == 're-select':
+            items({"menu_option": "menu"})
             account_menu(items)
     else:
         items.update({"message_opt": "yes", "message": "Enter a correct letter"})
@@ -90,23 +102,12 @@ def account_menu(items):
 
 # select account menu - a number from 1 - 5
 def account_select(items):
-    system('clear')
-    account_list(items)
-    print()
-    if items["message_opt"] == 'yes':
-        print(items["message"])
-        print()
-    # if items["account_num"] < list_len:
-#    low = items["account_num"] + (list_len - 1)
-#    if items["menu_option"] == 'select':
-#        print('Select Account (' + str(items["account_num"]) + ' - ' + str(low)
-#                + ')')
-#    elif items["menu_option"] == 'delete':
-#        print('Select Account to delete (' + str(items["account_num"]) + ' - '
-#                + str(low) + ')')
-#    else:
-#        print('Select Account to edit (' + str(items["account_num"]) + ' - ' +
-#                str(low) + ')')
+#    system('clear')
+#    account_list(items)
+#    print()
+#    if items["message_opt"] == 'yes':
+#        print(items["message"])
+#        print()
 
     if items["account_num"] > 0:
         select_string, str_left, str_right = selector(items, list_len)
@@ -116,13 +117,14 @@ def account_select(items):
     select_account = input('Select account: ')
     system('clear')
     if select_account == 'r':
-        return 're-select'
+        return 'menu'
     elif select_account.isnumeric() == False:
         items.update({"message_opt": "yes", "message": "\"Submit a number or (r)\""})
-        account_select(items)
+        account_menu(items)
     elif int(select_account) < str_left or int(select_account) > str_right:
-        items.update({"message_opt": "yes", "message": "\"Submit number within range\""})
-        account_select(items)
+        items.update({"message_opt": "yes", "message": "\"Submit number within \
+range\""})
+        return 're_select', items
     else:
         e = items["account_num"]
         all_accounts = items["accounts_json"]
@@ -134,7 +136,7 @@ def account_select(items):
                 break
             else:
                 e = e + 1
-
+  
         print(accounts["name"])
         selected_account = row[2]
         account_name = accounts["name"]
@@ -145,6 +147,10 @@ def account_select(items):
             alter_list = 5
             # items = [action, account_name, account_balance, alter_list, transaction_len]
             items = ['re-load', account_name, account_balance, alter_list, transaction_len]
+        #    print(items)
+        #    print(selected_account)
+        #    hello = input('hello')
+
             transaction_menu(selected_account, items)
         elif items["menu_option"] == 'delete':
             items.update({"account_listing": row[1], "selected_account": row[2]})
@@ -163,6 +169,7 @@ def account_select(items):
             else:
                 items.update({"data_load": "re-load"})
                 account_menu(items)
+#            hello = input('hello')
 
 # Select single transaction from list of transactions
 # items = [action, account_name, account_balance, alter_list, transaction_len, transaction_json, transaction_num]
@@ -217,78 +224,82 @@ def select_transaction(selected_account, items):
 # The menu under listed transaction
 # items = [action, account_name, account_balance, alter_list, transaction_len, transaction_json, edit_menu, transaction_num]
 def transaction_menu(selected_account, items):
-        transaction_json, transaction_num = transaction_list(selected_account, items)
-        if items[0] == 'message':
-            print()
-            print(items[7])
-        print('\nTransaction Menu\n')
-        if not items[3] >= items[4]:
-            print(' Page Up (u)')
-        if items[3] - 5 > 0:
-            print(' Page Down (d)')
-        print(' Deposit (a)\n Withdraw (w)\n Edit/Delete Transaction (e)\n Main Menu (m)\n Quit (q)')
+    system('clear')
+#    print(items)
+#    print(selected_account)
+#    hello = input('hello')
+    transaction_json, transaction_num = transaction_list(selected_account, items)
+    if items[0] == 'message':
         print()
-        change = str(input("Select: "))
-        change = change.lower()
-        if change == "u":
-            if not items[3] >= items[4]:
-                system('clear')
-                alter_list = items[3] + list_len
-                items = ['re-load', items[1], items[2], alter_list, items[4]]
-                transaction_menu(selected_account, items)
-            else:
-                system('clear')
-                the_message = ('"Selection out of range"')
-                items = ['message', items[1], items[2], items[3], items[4], transaction_json, transaction_num, the_message]
-                transaction_menu(selected_account, items)
-        elif change == "d":
-            if items[3] - 5 > 0:
-                system('clear')
-                items[3] = items[3] - 5
-                items = ['re-load', items[1], items[2], items[3], items[4]]
-                transaction_menu(selected_account, items)
-            else:
-                system('clear')
-                the_message = ('"Selection out of range"')
-                items = ['message', items[1], items[2], items[3], items[4], transaction_json, transaction_num, the_message]
-                transaction_menu(selected_account, items)
-        elif change == "e": 
+        print(items[7])
+    print('\nTransaction Menu\n')
+    if not items[3] >= items[4]:
+        print(' Page Up (u)')
+    if items[3] - 5 > 0:
+        print(' Page Down (d)')
+    print(' Deposit (a)\n Withdraw (w)\n Edit/Delete Transaction (e)\n Main Menu (m)\n Quit (q)')
+    print()
+    change = str(input("Select: "))
+    change = change.lower()
+    if change == "u":
+        if not items[3] >= items[4]:
             system('clear')
-            # items = [action, account_name, account_balance, alter_list, transaction_len, transaction_json, transaction_num]
-            items = ['load', items[1], items[2], items[3], items[4], transaction_json, transaction_num, 'select']
-            select_transaction(selected_account, items)
-        elif change == "a": 
-            system('clear')
-            items = ['Deposit', items[1], items[2], items[3], items[4], transaction_json, transaction_num]
-            new_balance, transaction_len = trans_act(selected_account, items)
-            if new_balance == 're-edit':
-                items[0] = 'menu'
-                transaction_menu(selected_account, items)
-            else:
-                items = ['re-load', items[1], new_balance, items[3], transaction_len]
-                transaction_menu(selected_account, items)
-        elif change == "w": 
-            system('clear')
-            items = ['Withdraw', items[1], items[2], items[3], items[4], transaction_json, transaction_num]
-            new_balance, transaction_len = trans_act(selected_account, items)
-            if new_balance == 're-edit':
-                items[0] = 'menu'
-                transaction_menu(selected_account, items)
-            else:
-                items = ['re-load', items[1], new_balance, items[3], transaction_len]
-                transaction_menu(selected_account, items)
-        elif change == "m":
-            system('clear')
-            items = {"data_load": "re-load", "alter_list": 5, "message_opt": "no", "message": ' '}
-            account_menu(items)
-        elif change == "q":
-            print("\nExiting...")
-            sys.exit()
+            alter_list = items[3] + list_len
+            items = ['re-load', items[1], items[2], alter_list, items[4]]
+            transaction_menu(selected_account, items)
         else:
             system('clear')
-            the_message = ('"Invalid input"')
+            the_message = ('"Selection out of range"')
             items = ['message', items[1], items[2], items[3], items[4], transaction_json, transaction_num, the_message]
             transaction_menu(selected_account, items)
+    elif change == "d":
+        if items[3] - 5 > 0:
+            system('clear')
+            items[3] = items[3] - 5
+            items = ['re-load', items[1], items[2], items[3], items[4]]
+            transaction_menu(selected_account, items)
+        else:
+            system('clear')
+            the_message = ('"Selection out of range"')
+            items = ['message', items[1], items[2], items[3], items[4], transaction_json, transaction_num, the_message]
+            transaction_menu(selected_account, items)
+    elif change == "e": 
+        system('clear')
+        # items = [action, account_name, account_balance, alter_list, transaction_len, transaction_json, transaction_num]
+        items = ['load', items[1], items[2], items[3], items[4], transaction_json, transaction_num, 'select']
+        select_transaction(selected_account, items)
+    elif change == "a": 
+        system('clear')
+        items = ['Deposit', items[1], items[2], items[3], items[4], transaction_json, transaction_num]
+        new_balance, transaction_len = trans_act(selected_account, items)
+        if new_balance == 're-edit':
+            items[0] = 'menu'
+            transaction_menu(selected_account, items)
+        else:
+            items = ['re-load', items[1], new_balance, items[3], transaction_len]
+            transaction_menu(selected_account, items)
+    elif change == "w": 
+        system('clear')
+        items = ['Withdraw', items[1], items[2], items[3], items[4], transaction_json, transaction_num]
+        new_balance, transaction_len = trans_act(selected_account, items)
+        if new_balance == 're-edit':
+            items[0] = 'menu'
+            transaction_menu(selected_account, items)
+        else:
+            items = ['re-load', items[1], new_balance, items[3], transaction_len]
+            transaction_menu(selected_account, items)
+    elif change == "m":
+        system('clear')
+        items = {"data_load": "re-load", "alter_list": 5, "message_opt": "no", "message": ' '}
+        account_menu(items)
+    elif change == "q":
+        print("\nExiting...")
+        sys.exit()
+    else:
+        system('clear')
+        the_message = ('"Invalid input"')
+        items = ['message', items[1], items[2], items[3], items[4], transaction_json, transaction_num, the_message]
+        transaction_menu(selected_account, items)
 
 
 # Edit transaction menu
