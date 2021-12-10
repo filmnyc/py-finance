@@ -23,12 +23,14 @@ def account_menu(items):
         items.update({"message_opt": "no", "message": " "})
     if items["menu_option"] == 'menu':
         pass
-    else:
-        the_account = account_select(items)
-        if the_account == 'menu':
-            items.update({"menu_option": "menu"})
+    elif items["menu_option"] == 'select' or \
+            items["menu_option"] == 'delete' or \
+            items["menu_option"] == 'edit':
+        items = account_select(items)
+        if items["menu_option"] == 'menu':
             account_menu(items)
-        if the_account == 'menu':
+        elif items["message_opt"] == 'yes':
+            account_menu(items)
     print('Account menu')
     if items["account_len"] <= list_len:
         pass
@@ -69,10 +71,11 @@ def account_menu(items):
             account_menu(items)
     elif choice == 's':
         items.update({"menu_option": "select"})
-        the_account = account_menu(items)
-        if the_account == 're-select':
-            items({"menu_option": "menu"})
-            account_menu(items)
+        account_menu(items)
+       # the_account = account_menu(items)
+       # if the_account == 're-select':
+       #     items({"menu_option": "menu"})
+       #     account_menu(items)
     elif choice == 'c':
         items.update({"menu_option": "create"})
         the_account = create_account(items)
@@ -84,16 +87,10 @@ def account_menu(items):
             account_menu(items)
     elif choice == 'a':
         items.update({"menu_option": "delete"})
-        the_account = account_select(items)
-        if the_account == 're-select':
-            items({"menu_option": "menu"})
-            account_menu(items)
+        account_menu(items)
     elif choice == 'e':
         items.update({"menu_option": "edit"})
-        the_account = account_menu(items)
-        if the_account == 're-select':
-            items({"menu_option": "menu"})
-            account_menu(items)
+        account_menu(items)
     else:
         items.update({"message_opt": "yes", "message": "Enter a correct letter"})
         account_menu(items)
@@ -117,14 +114,15 @@ def account_select(items):
     select_account = input('Select account: ')
     system('clear')
     if select_account == 'r':
-        return 'menu'
+        items.update({"menu_option": "menu"})
+        return items
     elif select_account.isnumeric() == False:
         items.update({"message_opt": "yes", "message": "\"Submit a number or (r)\""})
-        account_menu(items)
+        return items
     elif int(select_account) < str_left or int(select_account) > str_right:
         items.update({"message_opt": "yes", "message": "\"Submit number within \
 range\""})
-        return 're_select', items
+        return items
     else:
         e = items["account_num"]
         all_accounts = items["accounts_json"]
@@ -137,7 +135,7 @@ range\""})
             else:
                 e = e + 1
   
-        print(accounts["name"])
+#        print(accounts["name"])
         selected_account = row[2]
         account_name = accounts["name"]
         account_balance = accounts["balance"]
