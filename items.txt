@@ -1,0 +1,12 @@
+
+items = ({"data_load": "re-load", "menu_option": "menu", "alter_list": 5, 
+        "message_opt": "no", "message": ' '})
+# after loading account list
+items.update({"data_load": "load", 
+	"menu_option",: "menu", 
+	"alter_list": 5, 
+	"message_opt": "no", 
+	"message": ' ', 
+	"accounts_json": all_accounts_json, 
+	"account_num": account_list_num, 
+	"account_len": all_accounts_len})

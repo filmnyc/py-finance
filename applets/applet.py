@@ -14,32 +14,36 @@ def alchemyencoder(obj):
 
 # List of transactions of the selected account
 # items = [action, account_name, account_balance, list_offset, transaction_len]
-def transaction_list(selected_account, items):
+def transaction_list(items):
     print('Transaction List')
     # print('e ' + str(len(items)))
     print()
-    the_balance = '{:.2f}'.format(float(items[2]))
-    print(f"\t{items[1]} {the_balance}")
+    the_balance = '{:.2f}'.format(float(items["account_balance"]))
+    print(f"\t{items['account_name']} {the_balance}")
     print()
-    if items[0] == 're-load':
-        if items[4] <= items[3]:
+    if items["data_load"] == 're-load':
+        if items["transaction_len"] <= items["alter_list"]:
             trans_offset = 0
             e = 1
-        elif items[4] > items[3] and items[4] < items[3] + list_len:
-            trans_offset = items[4] - items[3]
+        elif items["transaction_len"] > items["alter_list"] and \
+                items["transaction_len"] < items["alter_list"] + list_len:
+            trans_offset = items["transaction_len"] - items["alter_list"]
             e = trans_offset + 1
-        elif items[4] == items[3] + list_len:
-            trans_offset = items[3]
+        elif items["transaction_len"] == items["alter_list"] + list_len:
+            trans_offset = items["alter_list"]
             e= trans_offset + 1
-        elif items[4] > items[3] + list_len:
-            the_gap = items[4] - (items[3] +list_len)
+        elif items["transaction_len"] > items["alter_list"] + list_len:
+            the_gap = items["transaction_len"] - (items["alter_list"] +list_len)
             if the_gap >= list_len:
                 trans_offset = (2 * list_len) + the_gap - list_len
                 e = trans_offset + 1
 
-        transaction_data = engine.execute('select * from transaction where account_id = {} order by cdate ASC limit {} offset {};'.format(selected_account, list_len, trans_offset))
+        transaction_data = engine.execute('select * from transaction where \
+                account_id = {} order by cdate ASC limit {} offset {};'\
+                .format(items["selected_account"], list_len, trans_offset))
 
-        transaction_json = json.dumps([dict(r) for r in transaction_data], default=alchemyencoder)
+        transaction_json = json.dumps([dict(r) for r in transaction_data], \
+                default=alchemyencoder)
         transaction_num = trans_offset + 1
     else:
         transaction_json = items[5]
@@ -49,8 +53,10 @@ def transaction_list(selected_account, items):
 
     for transact in transactions:
         transact_amount = '{:.2f}'.format(float(transact["amount"]))
-        transact_cdate = datetime.datetime.strptime(transact["cdate"], "%Y-%m-%d").strftime('%m/%d/%Y')
-        print(f'{e}) {transact_cdate} {transact["action"]} {transact_amount} - "{transact["comment"]}"')
+        transact_cdate = datetime.datetime.strptime(transact["cdate"], \
+                "%Y-%m-%d").strftime('%m/%d/%Y')
+        print(f'{e}) {transact_cdate} {transact["action"]} {transact_amount} - \
+"{transact["comment"]}"')
         e = e + 1
 
     return transaction_json, transaction_num
