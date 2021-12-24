@@ -65,14 +65,14 @@ def transaction_list(items):
 def selector(items, list_len):
     if items["account_num"] <= list_len:
         str_left = 1
-        str_right = items["account_num"]
+        str_right = items["account_len"]
         select_string = (items["menu_option"] + ' account (' + str(str_left) 
-                + ' - ' + str(items["account_num"]) + ')')
+                + ' - ' + str(str_right) + ')')
     else:
         str_left = items["account_num"]
         str_right = items["account_num"] + (list_len - 1)
         select_string = (items["menu_option"] + ' account (' + 
-                str(items["account_num"]) + ' - ' + str(str_right) + ')') 
+                str(str_right) + ' - ' + str(str_right) + ')') 
     return select_string, str_left, str_right
 
 # Check for "yes" or "no" action=comment(what you want to do), entity=on a variable, selectedname on object.

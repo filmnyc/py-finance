@@ -49,11 +49,10 @@ def date_maker(date_item):
             date_item = 'year'
 
 # items = [action, account_name, account_balance, alter_list, transaction_len, transaction_json, transaction_num, selected_transaction, edit_mode, transaction_id]
-def tedit_menu(selected_account, items):
+def tedit_menu(items):
     show = 'y'
     message = ''
     while show == 'y':
-        print()
         print('Edit Menu')
         print('\n (1) Edit date\n (2) Edit action\n (3) Change Amount\n (4) Edit Comment\n (5) Delete Transaction\n (6) Return')
         print()
@@ -62,16 +61,16 @@ def tedit_menu(selected_account, items):
             return edit_it
         else:
             system('clear')
-            transaction_list(selected_account, items)
+            transaction_list(items)
             print()
-            print(items[7])
+            print(items["transaction_item"])
             print()
             print("Your selection must be a \'number\' between 1 and 6")
 
 # Change Date
 # items = [action, account_name, account_balance, alter_list, transaction_len, transaction_json, transaction_num, selected_transaction, edit_mode, transaction_id]
-def edit_one(selected_account, items):
-    transaction_split, transaction_comment = transaction_spliter(items[7])
+def edit_one(items):
+    transaction_split, transaction_comment = transaction_spliter(items["transaction_item"])
     date_edit = go_ahead('Change Date from ' + transaction_split[1])
     if date_edit == 'y':
         print()
@@ -80,7 +79,7 @@ def edit_one(selected_account, items):
         date_approve = go_ahead('Is this okay?')
         if date_approve == 'y':
             date_new = new_date
-            date_db = db_session.query(Transaction).filter_by(id = items[9]).first()
+            date_db = db_session.query(Transaction).filter_by(id = items["transaction_id"]).first()
             date_db.cdate = date_new
             db_session.commit()
             transaction_updated = 'Updated: ' + new_date + ' ' + transaction_split[2] + ' ' + transaction_split[3] + ' - ' + transaction_comment
@@ -92,8 +91,8 @@ def edit_one(selected_account, items):
 
 # items = [action, account_name, account_balance, alter_list, transaction_len, transaction_json, transaction_num, selected_transaction, edit_mode, transaction_id]
 # transaction is  number,  date,  action, amount, comment
-def edit_two(selected_account, items):
-    transaction_split, transaction_comment = transaction_spliter(items[7])
+def edit_two(items):
+    transaction_split, transaction_comment = transaction_spliter(items["transaction_item"])
     if transaction_split[2] == 'Deposit':
         action_new = 'Withdraw'
     else:
@@ -125,14 +124,14 @@ def edit_two(selected_account, items):
         if do_trans == 'y':
 
                 #show old and new balance
-            old_balance = Transaction.query.with_entities(func.sum(Transaction.amount).filter(Transaction.account_id == selected_account).label('total')).first().total
+            old_balance = Transaction.query.with_entities(func.sum(Transaction.amount).filter(Transaction.account_id == items["selected_account"]).label('total')).first().total
             new_balance = str(float(old_balance) + float(transaction_total))
             new_balance_show = '{:.2f}'.format(float(new_balance))
             old_balance_show = '{:.2f}'.format(float(old_balance))
             print('Previous account balance: ' + old_balance_show + ' New account balance: ' + new_balance_show)
             do_bal = go_ahead("Record this transaction? ")
             if do_bal == 'y':
-                action_db = db_session.query(Transaction).filter_by(id = items[9]).first()
+                action_db = db_session.query(Transaction).filter_by(id = items["transaction_id"]).first()
                 if action_new == 'Withdraw':
                     action_db.amount = '-' + transaction_split[3].strip('$')
                 else:
@@ -140,7 +139,7 @@ def edit_two(selected_account, items):
 
                 action_db.action = action_new
                 db_session.commit()
-                balance_db = db_session.query(Account).join(Transaction, Transaction.account_id == Account.id, isouter = True).filter(Transaction.id == items[9]).first()
+                balance_db = db_session.query(Account).join(Transaction, Transaction.account_id == Account.id, isouter = True).filter(Transaction.id == items["transaction_id"]).first()
                 balance_db.balance = new_balance
                 db_session.commit()
                 transaction_updated = 'Updated: ' + transaction_split[1] + ' ' + action_new + ' ' + dash + transaction_split[3].strip('-') + ' - ' + transaction_comment
@@ -159,8 +158,8 @@ def edit_two(selected_account, items):
 
 # items = [action, account_name, account_balance, alter_list, transaction_len, transaction_json, transaction_num, selected_transaction, edit_mode, transaction_id]
 # transaction is  number,  date,  action, amount, comment
-def edit_three(selected_account, items, transaction_id):
-    transaction_split, transaction_comment = transaction_spliter(items[7])
+def edit_three(items):
+    transaction_split, transaction_comment = transaction_spliter(items["transaction_item"])
     present_amount = transaction_split[3].strip('$')
     change_amt = go_ahead('Change amount of ' + transaction_split[2] + ' from ' + present_amount + '? ')
     if change_amt == 'y':
@@ -215,7 +214,7 @@ def edit_three(selected_account, items, transaction_id):
 
         #show old and new balance
     # selected_balance = account_balance(selected)
-    old_balance = Transaction.query.with_entities(func.sum(Transaction.amount).filter(Transaction.account_id == selected_account).label('total')).first().total
+    old_balance = Transaction.query.with_entities(func.sum(Transaction.amount).filter(Transaction.account_id == items["selected_account"]).label('total')).first().total
     old_balance_show = '{:.2f}'.format(float(old_balance))
     new_balance = str(float(old_balance) + float(transaction_total))
     new_balance_show = '{:.2f}'.format(float(new_balance))
@@ -223,13 +222,13 @@ def edit_three(selected_account, items, transaction_id):
     print('Previous balance: ' + old_balance_show + ' New balance: ' + new_balance_show)
     do_bal = go_ahead("Record this transaction?:")
     if do_bal == 'y':
-        amount_db = db_session.query(Transaction).filter_by(id = items[9]).first()
+        amount_db = db_session.query(Transaction).filter_by(id = items["transaction_id"]).first()
         if transaction_split[2] == 'Withdraw':
             amount_db.amount = '-' + str(new_amount)
         else:
             amount_db.amount = new_amount
         db_session.commit()
-        balance_db = db_session.query(Account).join(Transaction, Transaction.account_id == Account.id, isouter = True).filter(Transaction.id == transaction_id).first()
+        balance_db = db_session.query(Account).join(Transaction, Transaction.account_id == Account.id, isouter = True).filter(Transaction.id == items["transaction_id"]).first()
         balance_db.balance = new_balance
         db_session.commit()
         transaction_updated = 'Updated: ' + transaction_split[1] + ' ' + transaction_split[2] + ' ' + new_amount_show + ' - ' + transaction_comment
@@ -239,8 +238,8 @@ def edit_three(selected_account, items, transaction_id):
 
 
 # transaction is  number,  date,  action, amount, comment
-def edit_four(transaction, transaction_id):
-    transaction_split, transaction_comment = transaction_spliter(transaction)
+def edit_four(items):
+    transaction_split, transaction_comment = transaction_spliter(items["transaction_item"])
     comment_edit = go_ahead('Edit Comment ' + transaction_comment)
     if comment_edit == 'y':
         print()
@@ -248,7 +247,7 @@ def edit_four(transaction, transaction_id):
         print('"' + new_comment + '"')
         comment_pass = go_ahead('Record this new comment?')
         if comment_pass == 'y':
-            comment_db = db_session.query(Transaction).filter_by(id = transaction_id).first()
+            comment_db = db_session.query(Transaction).filter_by(id = items["transaction_id"]).first()
             comment_db.comment = new_comment
             db_session.commit()
             transaction_updated = 'Updated: ' + transaction_split[1] + ' ' + transaction_split[2] + ' ' + transaction_split[3] + ' - "' + new_comment + '"'
@@ -260,9 +259,9 @@ def edit_four(transaction, transaction_id):
 
 # items = [action, account_name, account_balance, alter_list, transaction_len, transaction_json, transaction_num, selected_transaction, edit_mode, transaction_id]
 # transaction is  number,  date,  action, amount, comment
-def edit_five(selected_account, transaction, transaction_id):
-    transaction_split, transaction_comment = transaction_spliter(transaction)
-    old_balance = Transaction.query.with_entities(func.sum(Transaction.amount).filter(Transaction.account_id == selected_account).label('total')).first().total
+def edit_five(items):
+    transaction_split, transaction_comment = transaction_spliter(items["transaction_item"])
+    old_balance = Transaction.query.with_entities(func.sum(Transaction.amount).filter(Transaction.account_id == items["selected_account"]).label('total')).first().total
     old_balance_show = '{:.2f}'.format(float(old_balance))
     delete_pass = go_ahead('Delete selected transaction?')
     if delete_pass == 'y':
@@ -279,10 +278,10 @@ def edit_five(selected_account, transaction, transaction_id):
                 print('Deducting ' + transaction_split[3] + ' from the current balance of ' + old_balance_show + ' would be ' + change_balance_show) 
             deduct_it = go_ahead('Go ahead and delete transaction.')
             if deduct_it == 'y':
-                balance_db = db_session.query(Account).join(Transaction, Transaction.account_id == Account.id, isouter = True).filter(Transaction.id == transaction_id).first()
+                balance_db = db_session.query(Account).join(Transaction, Transaction.account_id == Account.id, isouter = True).filter(Transaction.id == items["transaction_id"]).first() 
                 balance_db.balance = change_balance
                 db_session.commit()
-                del_transaction = Transaction.query.get(transaction_id)
+                del_transaction = Transaction.query.get(items["transaction_id"])
                 db_session.delete(del_transaction)
                 db_session.commit()
                 return change_balance

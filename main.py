@@ -5,7 +5,6 @@ def main():
         "message_opt": "no", "message": ' '})
     account_menu(items)
     
-
 if __name__ == "__main__":
     # execute only if run as a script
     main()    

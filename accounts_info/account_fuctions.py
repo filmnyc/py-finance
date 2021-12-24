@@ -46,6 +46,9 @@ def change_account(items):
         del_account = Account.query.get(items["selected_account"])
         db_session.delete(del_account)
         db_session.commit()
+        items.update({"data_load": "re-load"})
+        items.update({"menu_option": "menu"})
+        return items
 
     if items["menu_option"] == 'edit':
         print('Change title from ' + items["account_name"] + ' to')
