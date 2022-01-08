@@ -9,4 +9,5 @@ items.update({"data_load": "load",
 	"message": ' ', 
 	"accounts_json": all_accounts_json, 
 	"account_num": account_list_num, 
-	"account_len": all_accounts_len})
+	"account_len": all_accounts_len
+	"selected_account: selected_account})

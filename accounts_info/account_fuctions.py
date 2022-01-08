@@ -1,12 +1,9 @@
 import time
 import sys
 from os import system, rename, remove
-from .models import Account, db_session, engine
-from applets.applet import while_yn, go_ahead, account_list
+from .models import Account, db_session, engine, Transaction
+from applets.applet import while_yn, go_ahead, account_list, selector
 
-
-# save_path = 'bank_accounts/'
-# information_file = 'information/'
 
 def create_account(items):
     system('clear')
@@ -51,7 +48,7 @@ def change_account(items):
         return items
 
     if items["menu_option"] == 'edit':
-        print('Change title from ' + items["account_name"] + ' to')
+        print('Change title from ' + items["account_name"] + ' to:')
         print()
         new_name = input('New title: ')
         edit_it = go_ahead('Change ' + items["account_name"] + ' to ' + new_name)
@@ -59,6 +56,63 @@ def change_account(items):
             rename_account = Account.query.get(items["selected_account"])
             rename_account.name = new_name
             db_session.commit()
-            return 'good'
+            items.update({"data_load": "re-load"})
+            items.update({"menu_option": "menu"})
+            return items
         else:
             return 'reject' 
+
+# select account menu - a number from 1 - 5
+def account_select(items):
+    if items["account_num"] > 0:
+        select_string, str_left, str_right = selector(items)
+        print(select_string)
+    print('Return (r):')
+    print()
+    select_account = input('Select account: ')
+    system('clear')
+    if select_account == 'r':
+        items.update({"menu_option": "menu"})
+        return items
+    elif select_account.isnumeric() == False:
+        items.update({"message_opt": "yes", "message": "\"Submit a number or (r)\""})
+        return items
+    elif int(select_account) < str_left or int(select_account) > str_right:
+        items.update({"message_opt": "yes", "message": "\"Submit number within \
+range\""})
+        return items
+    else:
+        e = items["account_num"]
+        all_accounts = items["accounts_json"]
+
+        for accounts in all_accounts:
+            account_amount = '{:.2f}'.format(float(accounts["balance"]))
+            row = [e, f'{e}) {accounts["name"]} {account_amount}', accounts["id"]]
+            if row[0] == int(select_account):
+                break
+            else:
+                e = e + 1
+  
+        selected_account = row[2]
+        account_name = accounts["name"]
+        account_balance = accounts["balance"]
+        account_number = select_account
+        transaction_len = db_session.query(Transaction).filter_by(account_id = \
+                selected_account).count()
+
+        list_len = items["list_len"]
+        items.update({"data_load": "re-load", "account_name": account_name, \
+                "account_balance": account_balance, "alter_list": list_len, \
+                "transaction_len": transaction_len, "selected_account": \
+                selected_account, "message_opt": "no", "message": " "})
+
+        if items["menu_option"] == 'select':
+            items.update({"menu_option": "transaction"})
+            return items
+        elif items["menu_option"] == 'delete':
+            items.update({"account_listing": row[1]})
+            return items
+        else: 
+            items["menu_option"] == 'edit'
+            items.update({"account_listing": row[1]})
+            return items

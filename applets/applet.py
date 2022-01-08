@@ -4,7 +4,7 @@ import json
 import datetime
 from accounts_info.models import engine, Account, db_session, Transaction
 
-list_len = 5
+# list_len = 5
 
 def alchemyencoder(obj):
     """JSON encoder function for SQLAlchemy special classes."""
@@ -12,43 +12,44 @@ def alchemyencoder(obj):
         return obj.isoformat()
 
 
-# List of transactions of the selected account
-# items = [action, account_name, account_balance, list_offset, transaction_len]
+# list of transactions of the selected account
 def transaction_list(items):
     print('Transaction List')
-    # print('e ' + str(len(items)))
     print()
     the_balance = '{:.2f}'.format(float(items["account_balance"]))
     print(f"\t{items['account_name']} {the_balance}")
     print()
     if items["data_load"] == 're-load':
-        if items["transaction_len"] <= items["alter_list"]:
+        if items["transaction_len"] <= items["list_len"]:
             trans_offset = 0
             e = 1
-        elif items["transaction_len"] > items["alter_list"] and \
-                items["transaction_len"] < items["alter_list"] + list_len:
-            trans_offset = items["transaction_len"] - items["alter_list"]
-            e = trans_offset + 1
-        elif items["transaction_len"] == items["alter_list"] + list_len:
-            trans_offset = items["alter_list"]
-            e= trans_offset + 1
-        elif items["transaction_len"] > items["alter_list"] + list_len:
-            the_gap = items["transaction_len"] - (items["alter_list"] +list_len)
-            if the_gap >= list_len:
-                trans_offset = (2 * list_len) + the_gap - list_len
+        else:
+            if items["transaction_len"] - items["alter_list"] < 0:
+                trans_offset = 0
+                e = 1
+                print("t-0")
+            elif items["transaction_len"] > items["alter_list"] and \
+                    items["transaction_len"] <= items["alter_list"] + items["list_len"]:
+                trans_offset = items["transaction_len"] - items["alter_list"]
                 e = trans_offset + 1
+                print("t-1")
+            elif items["transaction_len"] > items["alter_list"] + items["list_len"]:
+                # if items["transaction_len"] - items["alter_list"] >= 0:
+                trans_offset = items["transaction_len"] - items["alter_list"]
+                e = trans_offset + 1
+                print("t-2")
 
         transaction_data = engine.execute('select * from transaction where \
                 account_id = {} order by cdate ASC limit {} offset {};'\
-                .format(items["selected_account"], list_len, trans_offset))
+                .format(items["selected_account"], items["list_len"], trans_offset))
 
         transaction_json = json.dumps([dict(r) for r in transaction_data], \
                 default=alchemyencoder)
         transaction_num = trans_offset + 1
     else:
-        transaction_json = items[5]
-        transaction_num = items[6]
-        e = items[6]
+        transaction_json = items["transaction_json"]
+        transaction_num = items["transaction_num"]
+        e = items["transaction_num"]
     transactions = json.loads(transaction_json)
 
     for transact in transactions:
@@ -62,20 +63,26 @@ def transaction_list(items):
     return transaction_json, transaction_num
 
 
-def selector(items, list_len):
-    if items["account_num"] <= list_len:
-        str_left = 1
+def selector(items):
+    if items["account_len"] <= items["list_len"]:
+        str_left = items["account_num"]
         str_right = items["account_len"]
         select_string = (items["menu_option"] + ' account (' + str(str_left) 
                 + ' - ' + str(str_right) + ')')
     else:
-        str_left = items["account_num"]
-        str_right = items["account_num"] + (list_len - 1)
-        select_string = (items["menu_option"] + ' account (' + 
-                str(str_right) + ' - ' + str(str_right) + ')') 
+        if items["account_len"] > items["list_len"] and items["account_len"] < \
+                (items["list_len"] * 2):
+            str_left = items["account_num"]
+            str_right = items["account_num"] + 4
+            select_string = (items["menu_option"] + ' account (' + 
+                str(str_left) + ' - ' + str(str_right) + ')') 
+        else:
+            str_left = items["account_num"]
+            str_right = items["account_num"] + (items["list_len"] - 1)
+            select_string = (items["menu_option"] + ' account (' + 
+                str(str_left) + ' - ' + str(str_right) + ')') 
     return select_string, str_left, str_right
 
-# Check for "yes" or "no" action=comment(what you want to do), entity=on a variable, selectedname on object.
 def while_yn(action, entity, account_name):
     process_it = ''
     while not process_it == 'y' and not process_it == 'n':
@@ -126,18 +133,23 @@ def account_list(items):
     print(items["data_load"])
     all_accounts_len = db_session.query(Account).count()
     if items["data_load"] == 're-load':
-        if items["alter_list"] == list_len:
+        if items["alter_list"] == items["list_len"]:
             trans_offset = 0
             e = 1
         else:
             if all_accounts_len < items["alter_list"]:
-                trans_offset = all_accounts_len - list_len  
-                e = trans_offset + 1
+                if (all_accounts_len - list_len) < 0:
+                    trans_offset = 0
+                    e = 1
+                else:
+                    trans_offset = all_accounts_len - list_len  
+                    e = trans_offset + 1
             elif all_accounts_len >= items["alter_list"]:
                 trans_offset = items["alter_list"] - list_len
                 e= trans_offset + 1
 
-        account_data = engine.execute('select * from account order by id limit {} offset {};'.format(list_len, trans_offset))
+        account_data = engine.execute('select * from account order by id limit {} \
+                offset {};'.format(items["list_len"], trans_offset))
 
         account_json = json.dumps([dict(r) for r in account_data])
 
@@ -153,72 +165,6 @@ def account_list(items):
         print(f'{e}) {account["name"]} {account_amount}')
         e = e + 1
 
-    # items = {"data_load": "load", "account_len": items["account_len"], "accounts_json": all_accounts_json, "account_num": account_list_num, "alter_list": items["alter_list"]}
-    items.update({"data_load": "load", "accounts_json": all_accounts_json, "account_num": account_list_num, "account_len": all_accounts_len})
+    items.update({"data_load": "load", "accounts_json": all_accounts_json, \
+            "account_num": account_list_num, "account_len": all_accounts_len})
     return items
-# def trans_header(selected, selected_transaction, page):
-#     selected_account = account_name(selected)
-# 
-#         #Open selected account
-#     transact_item = list_transactions(selected_account)
-#     tran = transact_item[int(selected_transaction)]
-#     tran = tran.split(' ')
-#     if selected_transaction == '1':
-#         tran_3 = tran[4]
-#     else:
-#         tran_3 = tran[3]
-#     tran_0 = tran[0]
-#     if selected_transaction == '1':
-#         tran_1 = 'account opened'
-#     else:
-#         tran_1 = tran[1]
-#     trim = re.compile(r'[^\d.,]+')
-#     mystring = tran_3
-#     tran_3 = trim.sub('', mystring)
-#     
-#     transaction_list(selected, page)
-#     print() 
-#     print(selected_transaction + ') ' + tran_0 + ' ' + tran_1 + ' - $' + tran_3)
-#     print()
-#     return tran_0, tran_1, tran_3
-# 
-# 
-# 
-# # Select transaction for editing or deleting
-# def select_transaction(selected, page):
-#     selected_account = account_name(selected)
-#     transact_len = list_transactions(selected_account)
-#     a = len(transact_len) - (int(page) + 1)
-#     b = a + 5
-#     if a <= 1:
-#         low = a
-#     else:
-#         low = 0
-#     send_transaction = ''
-#     message = ''
-#     while send_transaction == '':
-#         print(message)
-#         print()
-#         print('Select Transaction (' + str(a + 1 - low) + ' - ' + str(a + 5) + ')')
-#         print('Return (r):')
-#         print()
-#         the_transaction = input('Select: ')
-#         print(the_transaction)
-#         if the_transaction == 'r':
-#             send_transaction = 'go_back'
-#             system('clear')
-#             return send_transaction
-#         elif the_transaction.isnumeric() == False:
-#             system('clear')
-#             transaction_list(selected, page)
-#             print()
-#             message = '"Submit a \'number\' or (r)"'
-#         elif int(the_transaction) < a + 1 - low or int(the_transaction) > (a + 5):
-#             system('clear')
-#             transaction_list(selected, page)
-#             print()
-#             message = '"Submit number within range" '
-#         else:
-#             send_transaction = the_transaction
-#             system('clear')
-#             return send_transaction

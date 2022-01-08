@@ -2,11 +2,11 @@
 from datetime import datetime
 from sqlalchemy import create_engine, Column, Integer, String, Float, Text, ForeignKey, Date
 from sqlalchemy.orm import sessionmaker, relationship, scoped_session
-from sqlalchemy.dialects.postgresql import TIMESTAMP
+# from sqlalchemy.dialects.postgresql import TIMESTAMP
 from sqlalchemy.types import TypeDecorator
-from sqlalchemy import DateTime as SdateTime
+# from sqlalchemy import DateTime as SdateTime
 from sqlalchemy.ext.declarative import declarative_base
-import time
+# import time
 
 
 engine = create_engine('postgresql://myuser:mypass@localhost:5432/accounts', echo=False)
