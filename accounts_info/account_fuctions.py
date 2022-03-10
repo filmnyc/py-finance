@@ -2,8 +2,49 @@ import time
 import sys
 from os import system, rename, remove
 from .models import Account, db_session, engine, Transaction
-from applets.applet import while_yn, go_ahead, account_list, selector
+from applets.applet import while_yn, go_ahead, selector
+import json
 
+def account_list(items):
+    print('\tAccount list')
+    print()
+    all_accounts_len = db_session.query(Account).count()
+    if items["data_load"] == 're-load':
+        if items["alter_list"] == items["list_len"]:
+            trans_offset = 0
+            e = 1
+        else:
+            if all_accounts_len < items["alter_list"]:
+                if (all_accounts_len - items["list_len"]) < 0:
+                    trans_offset = 0
+                    e = 1
+                else:
+                    trans_offset = all_accounts_len - items["list_len"]  
+                    e = trans_offset + 1
+            elif all_accounts_len >= items["alter_list"]:
+                trans_offset = items["alter_list"] - items["list_len"]
+                e= trans_offset + 1
+
+        account_data = engine.execute('select * from account order by id limit {} \
+                offset {};'.format(items["list_len"], trans_offset))
+
+        account_json = json.dumps([dict(r) for r in account_data])
+
+        account_list_num = trans_offset + 1
+        all_accounts_json = json.loads(account_json)
+    else:
+        account_list_num = items["account_num"]
+        e = items["account_num"]
+        all_accounts_json = items["accounts_json"]
+
+    for account in all_accounts_json:
+        account_amount = '{:.2f}'.format(float(account["balance"]))
+        print(f'{e}) {account["name"]} {account_amount}')
+        e = e + 1
+
+    items.update({"data_load": "load", "accounts_json": all_accounts_json, \
+            "account_num": account_list_num, "account_len": all_accounts_len})
+    return items
 
 def create_account(items):
     system('clear')

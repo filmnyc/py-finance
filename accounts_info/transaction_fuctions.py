@@ -1,10 +1,60 @@
 from os import system
 import time
 import datetime
-from applets.applet import currency, while_yn, go_ahead, transaction_list
+from applets.applet import currency, while_yn, go_ahead
 from .models import engine, Account, Transaction, db_session
 from sqlalchemy import func
 import json
+
+def alchemyencoder(obj):
+    """JSON encoder function for SQLAlchemy special classes."""
+    if isinstance(obj, datetime.date):
+        return obj.isoformat()
+
+def transaction_list(items):
+    print('Transaction List')
+    print()
+    the_balance = '{:.2f}'.format(float(items["account_balance"]))
+    print(f"\t{items['account_name']} {the_balance}")
+    print()
+    if items["data_load"] == 're-load':
+        if items["transaction_len"] <= items["list_len"]:
+            trans_offset = 0
+            e = 1
+        else:
+            if items["transaction_len"] - items["alter_list"] < 0:
+                trans_offset = 0
+                e = 1
+            elif items["transaction_len"] > items["alter_list"] and \
+                    items["transaction_len"] <= items["alter_list"] + items["list_len"]:
+                trans_offset = items["transaction_len"] - items["alter_list"]
+                e = trans_offset + 1
+            elif items["transaction_len"] > items["alter_list"] + items["list_len"]:
+                trans_offset = items["transaction_len"] - items["alter_list"]
+                e = trans_offset + 1
+
+        transaction_data = engine.execute('select * from transaction where \
+                account_id = {} order by cdate ASC limit {} offset {};'\
+                .format(items["selected_account"], items["list_len"], trans_offset))
+
+        transaction_json = json.dumps([dict(r) for r in transaction_data], \
+                default=alchemyencoder)
+        transaction_num = trans_offset + 1
+    else:
+        transaction_json = items["transaction_json"]
+        transaction_num = items["transaction_num"]
+        e = items["transaction_num"]
+    transactions = json.loads(transaction_json)
+
+    for transact in transactions:
+        transact_amount = '{:.2f}'.format(float(transact["amount"]))
+        transact_cdate = datetime.datetime.strptime(transact["cdate"], \
+                "%Y-%m-%d").strftime('%m/%d/%Y')
+        print(f'{e}) {transact_cdate} {transact["action"]} {transact_amount} - \
+"{transact["comment"]}"')
+        e = e + 1
+
+    return transaction_json, transaction_num
 
 def trans_act(items):
     print()

@@ -1,10 +1,11 @@
 import datetime
 from os import system
 import sys
-from .transaction_fuctions import trans_act, select_transaction
-from .account_fuctions import create_account, change_account, account_select
+from .transaction_fuctions import trans_act, select_transaction, transaction_list
+from .account_fuctions import (create_account, change_account, account_select,
+       account_list)
 from .transaction_edit import tedit_menu, edit_one, edit_two, edit_three, edit_four, edit_five
-from applets.applet import transaction_list, account_list
+# from applets.applet import transaction_list
 from .models import engine, Account, db_session, Transaction
 from sqlalchemy import func
 import json
@@ -15,8 +16,7 @@ import decimal, datetime
 def account_menu(items):  
     system('clear')
     items = account_list(items)
-    print(items["account_num"])
-    print(items["account_len"])
+    print()
     if items["message_opt"] == 'yes':
         print(items["message"])
         print()
@@ -69,7 +69,7 @@ def account_menu(items):
             items.update({"alter_list": new_list, "data_load": "re-load"})
             account_menu(items)
     elif choice == 'u':
-        if items["alter_list"] == list_len:
+        if items["alter_list"] == items["list_len"]:
             items.update({"message_opt": "yes", "message": "Wrong direction"})
             account_menu(items)
         else:
@@ -103,7 +103,7 @@ def account_menu(items):
 # The menu under listed transaction
 def transaction_menu(items):
     system('clear')
-    print(items["data_load"])
+    print()
     transaction_json, transaction_num = transaction_list(items)
     if items["message_opt"] == 'yes':
         print()
