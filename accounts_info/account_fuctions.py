@@ -1,13 +1,13 @@
-import time
-import sys
-from os import system, rename, remove
+from os import system
 from .models import Account, db_session, engine, Transaction
-from applets.applet import while_yn, go_ahead, selector
+from applets.applet import go_ahead, selector
 import json
+from rich import print
+
 
 def account_list(items):
     print('\tAccount list')
-    print()
+    print(items["data_load"])
     all_accounts_len = db_session.query(Account).count()
     if items["data_load"] == 're-load':
         if items["alter_list"] == items["list_len"]:
@@ -19,13 +19,13 @@ def account_list(items):
                     trans_offset = 0
                     e = 1
                 else:
-                    trans_offset = all_accounts_len - items["list_len"]  
+                    trans_offset = all_accounts_len - items["list_len"]
                     e = trans_offset + 1
             elif all_accounts_len >= items["alter_list"]:
                 trans_offset = items["alter_list"] - items["list_len"]
-                e= trans_offset + 1
+                e = trans_offset + 1
 
-        account_data = engine.execute('select * from account order by id limit {} \
+        account_data = engine.execute('select * from account order by id limit {}\
                 offset {};'.format(items["list_len"], trans_offset))
 
         account_json = json.dumps([dict(r) for r in account_data])
@@ -42,9 +42,11 @@ def account_list(items):
         print(f'{e}) {account["name"]} {account_amount}')
         e = e + 1
 
-    items.update({"data_load": "load", "accounts_json": all_accounts_json, \
-            "account_num": account_list_num, "account_len": all_accounts_len})
+    items.update({"data_load": "load", "accounts_json": all_accounts_json,
+                  "account_num": account_list_num, "account_len":
+                  all_accounts_len})
     return items
+
 
 def create_account(items):
     system('clear')
@@ -62,14 +64,13 @@ def create_account(items):
     else:
         return 'reject'
 
-    new_acct = Account(name = account_name, balance=.00)
+    new_acct = Account(name=account_name, balance=.00)
     db_session.add(new_acct)
     db_session.commit()
     system('clear')
     return 'good'
 
-# Linked from menu mondule - list_menu
-# items = [account_name, account_balance, account_number. action]
+
 def change_account(items):
     account_list(items)
     print()
@@ -80,7 +81,8 @@ def change_account(items):
         if delete_it == 'y':
             pass
         else:
-            return 'reject'
+            items.update({"menu_option": "menu"})
+            return items
         del_account = Account.query.get(items["selected_account"])
         db_session.delete(del_account)
         db_session.commit()
@@ -92,7 +94,8 @@ def change_account(items):
         print('Change title from ' + items["account_name"] + ' to:')
         print()
         new_name = input('New title: ')
-        edit_it = go_ahead('Change ' + items["account_name"] + ' to ' + new_name)
+        edit_it = go_ahead('Change ' + items["account_name"] + ' to '
+                           + new_name)
         if edit_it == 'y':
             rename_account = Account.query.get(items["selected_account"])
             rename_account.name = new_name
@@ -101,9 +104,10 @@ def change_account(items):
             items.update({"menu_option": "menu"})
             return items
         else:
-            return 'reject' 
+            items.update({"menu_option": "menu"})
+            return items
 
-# select account menu - a number from 1 - 5
+
 def account_select(items):
     if items["account_num"] > 0:
         select_string, str_left, str_right = selector(items)
@@ -115,12 +119,13 @@ def account_select(items):
     if select_account == 'r':
         items.update({"menu_option": "menu"})
         return items
-    elif select_account.isnumeric() == False:
-        items.update({"message_opt": "yes", "message": "\"Submit a number or (r)\""})
+    elif select_account.isnumeric() is False:
+        items.update({"message_opt": "yes", "message":
+                      "\"Submit a number or (r)\""})
         return items
     elif int(select_account) < str_left or int(select_account) > str_right:
-        items.update({"message_opt": "yes", "message": "\"Submit number within \
-range\""})
+        items.update({"message_opt": "yes", "message":
+                      "\"Submit number within range\""})
         return items
     else:
         e = items["account_num"]
@@ -128,32 +133,32 @@ range\""})
 
         for accounts in all_accounts:
             account_amount = '{:.2f}'.format(float(accounts["balance"]))
-            row = [e, f'{e}) {accounts["name"]} {account_amount}', accounts["id"]]
+            row = ([e, f'{e}) {accounts["name"]} {account_amount}',
+                   accounts["id"]])
             if row[0] == int(select_account):
                 break
             else:
                 e = e + 1
-  
         selected_account = row[2]
         account_name = accounts["name"]
         account_balance = accounts["balance"]
-        account_number = select_account
-        transaction_len = db_session.query(Transaction).filter_by(account_id = \
-                selected_account).count()
-
+        transaction_len = (db_session.query(Transaction).filter_by
+                           (account_id=selected_account).count())
         list_len = items["list_len"]
-        items.update({"data_load": "re-load", "account_name": account_name, \
-                "account_balance": account_balance, "alter_list": list_len, \
-                "transaction_len": transaction_len, "selected_account": \
-                selected_account, "message_opt": "no", "message": " "})
+        items.update({"account_name": account_name,
+                      "account_balance": account_balance, "alter_list":
+                      list_len,  "transaction_len": transaction_len,
+                      "selected_account": selected_account, "message_opt":
+                      "no", "message": " "})
 
         if items["menu_option"] == 'select':
-            items.update({"menu_option": "transaction"})
+            items.update({"menu_option": "transaction",
+                          "data_load": "re-load"})
             return items
         elif items["menu_option"] == 'delete':
             items.update({"account_listing": row[1]})
             return items
-        else: 
+        else:
             items["menu_option"] == 'edit'
             items.update({"account_listing": row[1]})
             return items
