@@ -7,6 +7,10 @@ from .account_fuctions import (create_account, change_account, account_select,
 from .transaction_edit import (tedit_menu, edit_one, edit_two, edit_three,
                                edit_four, edit_five)
 from rich import print
+from applets.applet import selector
+from .models import Account, db_session, engine, Transaction
+from .transfer import (transfer_one, transfer_two, transfer_three,
+                      transfer_four, transfer_five)
 
 
 def account_menu(items):
@@ -36,6 +40,8 @@ def account_menu(items):
                 account_menu(items)
             elif items["menu_option"] == 'transaction':
                 items = transaction_menu(items)
+    else:
+        items = transfer_menu(items)
     print('Account menu')
     print()
     if items["account_len"] <= items["alter_list"]:
@@ -49,6 +55,7 @@ def account_menu(items):
     print(' Select (s) ')
     print(' Create (c)')
     print(' Delete (a)')
+    print(' Transfer (t)')
     print(' Edit (e)')
     print(' Exit (q)')
     print()
@@ -87,6 +94,9 @@ def account_menu(items):
     elif choice == 'a':
         items.update({"menu_option": "delete"})
         account_menu(items)
+    elif choice == 't':
+        items.update({"menu_option": "transfer_one"})
+        account_menu(items)
     elif choice == 'e':
         items.update({"menu_option": "edit"})
         account_menu(items)
@@ -95,6 +105,97 @@ def account_menu(items):
                       "\"Enter a correct letter\""})
         account_menu(items)
 
+
+def transfer_menu(items):
+    if items["menu_option"] == 'transfer_one':
+        items = transfer_one(items)
+        account_menu(items)
+    elif items["menu_option"] == 'transfer_two':
+        items = transfer_two(items)
+        account_menu(items)
+    elif items["menu_option"] == 'transfer_three':
+        items = transfer_three(items)
+        account_menu(items)
+    elif items["menu_option"] == 'transfer_four':
+        items = transfer_four(items)
+        account_menu(items)
+    elif items["menu_option"] == 'transfer_five':
+        items = transfer_five(items)
+        account_menu(items)
+    
+        # items.update({"account_listing": row[1]})
+#         if items["account_num"] > 0:
+#             select_string, str_left, str_right = selector(items)
+#             if items["account_len"] <= items["alter_list"]:
+#                 pass
+#             else:
+#                 print(' Move down (d) ')
+#             if items["alter_list"] > items["list_len"]:
+#                 print(' Move up (u) ')
+#             else:
+#                 pass
+#             print(' Account ' + select_string)
+#         else:
+#             pass
+#     elif items["account_num"] == 'transfer_from':
+#     print(' Return (r):')
+#     print()
+#     selection = input('Make Selection: ')
+#     system('clear')
+#     if selection == 'r':
+#         items.update({"menu_option": "menu"})
+#         return items
+#     elif selection == 'd':
+#         if items["alter_list"] >= items["account_len"]:
+#             items.update({"message_opt": "yes", "message": "Wrong direction"})
+#             account_menu(items)
+#         else:
+#             new_list = items["alter_list"] + items["list_len"]
+#             items.update({"alter_list": new_list, "data_load": "re-load"})
+#             account_menu(items)
+#     elif selection == 'u':
+#         if items["alter_list"] == items["list_len"]:
+#             items.update({"message_opt": "yes", "message": "Wrong direction"})
+#             account_menu(items)
+#         else:
+#             new_list = items["alter_list"] - items["list_len"]
+#             items.update({"alter_list": new_list, "data_load": "re-load"})
+#             account_menu(items)
+#     elif selection.isnumeric() is False:
+#         items.update({"message_opt": "yes", "message":
+#                       "\"Submit a number or (r)\""})
+#         return items
+#     elif int(selection) < str_left or int(selection) > str_right:
+#         items.update({"message_opt": "yes", "message":
+#                       "\"Submit number within range\""})
+#         return items
+#     else:
+#         e = items["account_num"]
+#         all_accounts = items["accounts_json"]
+# 
+#         for accounts in all_accounts:
+#             account_amount = '{:.2f}'.format(float(accounts["balance"]))
+#             row = ([e, f'{e}) {accounts["name"]} {account_amount}',
+#                    accounts["id"]])
+#             if row[0] == int(selection):
+#                 break
+#             else:
+#                 e = e + 1
+#         selected_account = row[2]
+#         account_name = accounts["name"]
+#         account_balance = accounts["balance"]
+#         transaction_len = (db_session.query(Transaction).filter_by
+#                            (account_id=selected_account).count())
+#         list_len = items["list_len"]
+#         items.update({"account_name": account_name,
+#                       "account_balance": account_balance, "alter_list":
+#                       list_len,  "transaction_len": transaction_len,
+#                       "selected_account": selected_account, "message_opt":
+#                       "no", "message": " "})
+#         items["menu_option"] == 'Transfer_From'
+#         items.update({"account_listing": row[1]})
+#         return items
+    # if items["menu_option": "transfer_from"]:
 
 def transaction_menu(items):
     system('clear')

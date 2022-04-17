@@ -68,20 +68,19 @@ def selector(items):
     if items["account_len"] <= items["list_len"]:
         str_left = items["account_num"]
         str_right = items["account_len"]
-        select_string = (items["menu_option"] + ' account (' + str(str_left)
-                         + ' - ' + str(str_right) + ')')
+        select_string = ('(' + str(str_left) + ' - ' + str(str_right) + ')')
     else:
         if items["account_len"] > items["list_len"] and \
                 items["account_len"] < (items["list_len"] * 2):
             str_left = items["account_num"]
             str_right = items["account_num"] + 4
-            select_string = (items["menu_option"] + ' account (' +
-                             str(str_left) + ' - ' + str(str_right) + ')')
+            select_string = ('(' + str(str_left) + ' - ' 
+                             + str(str_right) + ')')
         else:
             str_left = items["account_num"]
             str_right = items["account_num"] + (items["list_len"] - 1)
-            select_string = (items["menu_option"] + ' account (' +
-                             str(str_left) + ' - ' + str(str_right) + ')')
+            select_string = ('(' + str(str_left) + ' - ' +
+                             str(str_right) + ')')
     return select_string, str_left, str_right
 
 

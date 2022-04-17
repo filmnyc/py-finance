@@ -111,7 +111,7 @@ def change_account(items):
 def account_select(items):
     if items["account_num"] > 0:
         select_string, str_left, str_right = selector(items)
-        print(select_string)
+        print('Select Account: ' + select_string)
     print('Return (r):')
     print()
     select_account = input('Select account: ')
