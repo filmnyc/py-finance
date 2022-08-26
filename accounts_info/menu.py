@@ -16,7 +16,7 @@ from .transfer import (transfer_one, transfer_two, transfer_three,
 def account_menu(items):
     system('clear')
     items = account_list(items)
-    print()
+    print(items["account_len"])
     if items["message_opt"] == 'yes':
         print(items["message"])
         print()
@@ -43,7 +43,8 @@ def account_menu(items):
     else:
         items = transfer_menu(items)
     print('Account menu')
-    print()
+    # print(items["alter_list"])
+    print(items["account_len"])
     if items["account_len"] <= items["alter_list"]:
         pass
     else:
@@ -89,7 +90,7 @@ def account_menu(items):
             items.update({"menu_option": "menu"})
             account_menu(items)
         else:
-            items.update({"data_load": "re-load"})
+            items.update({"data_load": "re-load", "menu_option": "menu"})
             account_menu(items)
     elif choice == 'a':
         items.update({"menu_option": "delete"})
@@ -377,18 +378,20 @@ def transaction_edit(items):
 
     # delete transaction
     elif items["menu_option"] == '5':
-        new_balance = edit_five(items)
-        if new_balance == 're-edit':
-            system('clear')
-            items.update({"menu_option": "edit_menu"})
-            transaction_edit(items)
-        else:
-            system('clear')
-            transaction_len = items["transaction_len"] - 1
-            items.update({"data_load": "re-load"})
-            items.update({"account_balance": new_balance})
-            items.update({"transaction_len": transaction_len})
-            transaction_menu(items)
+        items = edit_five(items)
+        transaction_edit(items)
+
+#        if new_balance == 're-edit':
+#            system('clear')
+#            items.update({"menu_option": "edit_menu"})
+#            transaction_edit(items)
+#        else:
+#            system('clear')
+#            transaction_len = items["transaction_len"] - 1
+#            items.update({"data_load": "re-load"})
+#            items.update({"account_balance": new_balance})
+#            items.update({"transaction_len": transaction_len})
+#            transaction_menu(items)
 
     # return to menu
     elif items["menu_option"] == '6':

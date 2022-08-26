@@ -44,6 +44,7 @@ def transfer_one(items):
             items.update({"alter_list": new_list, "data_load": "re-load"})
             return items
     elif selection == 'u':
+        # if items["account_num"] == 1:
         if items["alter_list"] == items["list_len"]:
             items.update({"message_opt": "yes", "message": "Wrong direction",
                           "menu_option": "menu"})
@@ -129,10 +130,16 @@ def transfer_three(items):
         pass
     else:
         print(' Move down (d) ')
-    if items["alter_list"] > items["list_len"]:
+    if items["account_num"] > items["list_len"]:
         print(' Move up (u) ')
     else:
         pass
+
+#        print(' Move down (d) ')
+#    if items["alter_list"] > items["list_len"]:
+#        print(' Move up (u) ')
+#    else:
+#        pass
     print(' Select account ' + select_string)
     print(' Return (r)')
     print()
@@ -143,8 +150,7 @@ def transfer_three(items):
         return items
     elif selection == 'd':
         if items["alter_list"] >= items["account_len"]:
-            items.update({"message_opt": "yes", "message": "Wrong direction",
-                          "menu_option": "menu"})
+            items.update({"message_opt": "yes", "message": "Wrong direction"})
             return items
         else:
             new_list = items["alter_list"] + items["list_len"]
@@ -152,8 +158,7 @@ def transfer_three(items):
             return items
     elif selection == 'u':
         if items["alter_list"] == items["list_len"]:
-            items.update({"message_opt": "yes", "message": "Wrong direction",
-                          "menu_option": "menu"})
+            items.update({"message_opt": "yes", "message": "Wrong direction"})
             return items
         else:
             new_list = items["alter_list"] - items["list_len"]
@@ -221,15 +226,21 @@ def transfer_four(items):
         from_transaction = (Transaction(action='Transfer',
                             amount='-' + items["transfer_amt"], cdate=db_date,
                             comment=from_comment, account_id=items
-                            ["from_account"]))
+                            ["from_account"])) 
         db_session.add(from_transaction)
         to_comment = 'transfered from ' + items["from_name"]
         to_transaction = (Transaction(action='Transfer',
                           amount=items["transfer_amt"], cdate=db_date,
                           comment=to_comment, account_id=items
-                          ["to_account"]))
+                          ["to_account"])) 
         db_session.add(to_transaction)
         db_session.commit()
+        # print(to_transaction.id)
+        # hello = input('hello')
+        from_transaction.transfer_id = to_transaction.id
+        to_transaction.transfer_id = from_transaction.id
+        db_session.add(from_transaction)
+        db_session.add(to_transaction)
         from_balance = (Transaction.query.with_entities(func.sum
                        (Transaction.amount).filter
                        (Transaction.account_id == items
@@ -246,8 +257,13 @@ def transfer_four(items):
         to_row.balance = to_balance
         db_session.commit()
         items.update({"to_balance": to_balance, "from_balance":
-                      from_balance, "menu_option": "transfer_five",
-                      "data_load": "re-load"})
+                      from_balance})
+        items.update({"message_opt": "yes", "message":
+                       ' New balance of ' + items["from_name"] + ' is ' +
+                       '{:.2f}'.format(float(items["from_balance"])) + '\n' +
+                       ' New balance of ' + items["to_name"] + ' is ' +
+                       '{:.2f}'.format(float(items["to_balance"])),
+                       "menu_option": "menu", "data_load": "re-load"})
         return items
 
 

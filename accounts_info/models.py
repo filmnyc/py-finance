@@ -39,6 +39,7 @@ class Transaction(Base):
     amount = Column(Float, nullable=False)
     cdate = Column(Date, default=datetime.today().strftime("%Y-%m-%d"),
                    nullable=False)
+    transfer_id = Column(Integer, nullable=True)
     comment = Column(Text)
     account_id = Column(Integer, ForeignKey('account.id'), nullable=False)
 

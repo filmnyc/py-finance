@@ -84,6 +84,16 @@ def selector(items):
     return select_string, str_left, str_right
 
 
+def account_move(items):
+    if items["account_len"] <= items["alter_list"]:
+        pass
+    else:
+        print(' Move down (d) ')
+    if items["alter_list"] > items["list_len"]:
+        print(' Move up (u) ')
+    else:
+        pass
+
 def while_yn(action, entity, account_name):
     process_it = ''
     while not process_it == 'y' and not process_it == 'n':

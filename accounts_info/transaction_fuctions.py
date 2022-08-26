@@ -33,8 +33,9 @@ def transaction_list(items):
                   items["list_len"]):
                 trans_offset = items["transaction_len"] - items["alter_list"]
                 e = trans_offset + 1
-            elif (items["transaction_len"] > items["alter_list"] +
-                  items["list_len"]):
+#            elif (items["transaction_len"] > items["alter_list"] +
+#                  items["list_len"]):
+            else:
                 trans_offset = items["transaction_len"] - items["alter_list"]
                 e = trans_offset + 1
 

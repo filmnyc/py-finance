@@ -41,6 +41,7 @@ def account_list(items):
         account_amount = '{:.2f}'.format(float(account["balance"]))
         print(f'{e}) {account["name"]} {account_amount}')
         e = e + 1
+    all_accounts_len = db_session.query(Account).count()
 
     items.update({"data_load": "load", "accounts_json": all_accounts_json,
                   "account_num": account_list_num, "account_len":

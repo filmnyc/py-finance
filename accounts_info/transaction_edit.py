@@ -4,8 +4,7 @@ from applets.applet import go_ahead, currency, transaction_list
 from .models import Account, db_session, Transaction
 
 
-# selected to find the account and selected_transaction
-# for the specific transaction
+# Break up listed transaction
 def transaction_spliter(transaction):
     transaction_split = transaction.split(' ')
     transaction_split2 = transaction.split(' - ')
@@ -71,7 +70,7 @@ def tedit_menu(items):
             print()
             print(items["transaction_item"])
             print()
-            print("Your selection must be a \'number\' between 1 and 6")
+            print("\"Your selection must be a \'number\' between 1 and 6\"")
 
 
 # Change Date
@@ -101,7 +100,7 @@ def edit_one(items):
         return 're-edit'
 
 
-# transaction is  number,  date,  action, amount, comment
+# Change action
 def edit_two(items):
     transaction_split, transaction_comment = (transaction_spliter(items
                                               ["transaction_item"]))
@@ -182,7 +181,7 @@ def edit_two(items):
         return 're-edit', 're-edit'
 
 
-# transaction is  number,  date,  action, amount, comment
+# Change amount
 def edit_three(items):
     transaction_split, transaction_comment = (transaction_spliter(items
                                               ["transaction_item"]))
@@ -276,7 +275,7 @@ def edit_three(items):
         return 're-edit', 're-edit'
 
 
-# transaction is  number,  date,  action, amount, comment
+# Edit Commnent
 def edit_four(items):
     transaction_split, transaction_comment = (transaction_spliter(items
                                               ["transaction_item"]))
@@ -302,51 +301,59 @@ def edit_four(items):
         return 're-edit'
 
 
-# items = [action, account_name, account_balance, alter_list, transaction_len,
-# transaction_json, transaction_num, selected_transaction, edit_mode,
-# transaction_id], transaction is  number,  date,  action, amount, comment
+# Delete transaction
 def edit_five(items):
     transaction_split, transaction_comment = (transaction_spliter
                                               (items["transaction_item"]))
-    old_balance = (Transaction.query.with_entities(func.sum(Transaction.amount)
-                   .filter(Transaction.account_id == items["selected_account"])
-                   .label('total')).first().total)
-    old_balance_show = '{:.2f}'.format(float(old_balance))
+
+    the_transaction = Transaction.query.get(items["transaction_id"])
+    the_account = Account.query.get(the_transaction.account_id)
+    the_balance = (Transaction.query.with_entities(func.sum(Transaction.amount)
+               .filter(Transaction.account_id == the_transaction.account_id)
+               .label('total')).first().total)
+    the_balance_show = '{:.2f}'.format(float(the_balance))
+    transaction_amount = the_transaction.amount
+    transaction_amount_show = '{:.2f}'.format(float(transaction_amount))
     delete_pass = go_ahead('Delete selected transaction?')
     if delete_pass == 'y':
-        print(f'Delete: {transaction_split[1]} {transaction_split[2]} \
-              {transaction_split[3]} - {transaction_comment}')
-        delete_it = go_ahead('Mark this transaction for deletion?')
-        if delete_it == 'y':
-            if transaction_split[2] == 'Withdraw':
-                change_balance = (float(old_balance) +
-                                  float(transaction_split[3].strip('-')))
-                change_balance_show = '{:.2f}'.format(float(change_balance))
-                print('Adding ' + transaction_split[3].strip('-') + ' to the current \
-balance of ' + old_balance_show + ' would be ' + change_balance_show)
-            else:
-                change_balance = (float(old_balance) -
-                                  float(transaction_split[3]))
-                change_balance_show = '{:.2f}'.format(float(change_balance))
-                print('Deducting ' + transaction_split[3] + ' from the current \
-balance of ' + old_balance_show + ' would be ' + change_balance_show)
-            deduct_it = go_ahead('Go ahead and delete transaction.')
-            if deduct_it == 'y':
-                balance_db = (db_session.query(Account).
-                              join(Transaction, Transaction.
-                              account_id == Account.id, isouter=True).
-                              filter(Transaction. id ==
-                              items["transaction_id"]).first())
-                balance_db.balance = change_balance
-                db_session.commit()
-                del_transaction = Transaction.query.get(items
-                                                        ["transaction_id"])
-                db_session.delete(del_transaction)
-                db_session.commit()
-                return change_balance
-            else:
-                return 're-edit'
+        change_balance = -(the_transaction.amount) + the_balance
+        change_balance_show = '{:.2f}'.format(float(change_balance))
+        the_account.balance = change_balance
+        db_session.commit()
+        del_transaction = Transaction.query.get(the_transaction.id)
+        db_session.delete(del_transaction)
+        # db_session.commit()
+        delete_message_1 = ('\"New balance: ' + the_account.name + ' - '
+                            + change_balance_show + '\"') 
+        if the_transaction.action == 'Transfer':
+            transaction_to = Transaction.query.get(the_transaction.transfer_id)
+            db_session.delete(transaction_to)
+            account_to = Account.query.get(transaction_to.account_id)
+            old_balance_to = (Transaction.query.with_entities(func.sum(Transaction.amount)
+                       .filter(Transaction.account_id == transaction_to.account_id)
+                       .label('total')).first().total)
+            change_to_balance = -(transaction_to.amount) + old_balance_to
+            change_to_balance_show = '{:.2f}'.format(float(change_to_balance))
+            account_to.balance = change_to_balance
+#            print(change_balance_show)
+#            print(change_to_balance_show)
+#            hello = input('hello')
+            db_session.commit()
+            message = ('\"New balance: ' + account_to.name + ' - '
+                       + change_to_balance_show + '\"\n' + delete_message_1)
+            transaction_len = items["transaction_len"] - 1
+            items.update({"menu_option": "6", "message_opt": "yes", \
+                          "message": message, "data_load": "re-load", \
+                          "transaction_len": transaction_len, "account_balance":
+                          change_balance})
         else:
-            return 're-edit'
-    else:
-        return 're-edit'
+            message = delete_message_1
+            transaction_len = items["transaction_len"] - 1
+            items.update({"menu_option": "6", "message_opt": "yes", \
+                          "message": message, "data_load": "re-load", \
+                          "transaction_len": transaction_len})
+        return items
+    else: 
+        items.update({"menu_option": "menu_edit"})
+        return items     
+    
