@@ -1,7 +1,0 @@
-To do:
-
-x Fix error message account 'select_string' when account_num is less than list_len.
-Select Account - not (r) returning after error message.
-Reconfig account_menu to handle redirection from above menu listing.
-Re-factor edit and delete to redirect to change_account.
-Re-factor transaction listings.

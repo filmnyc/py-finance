@@ -1,7 +1,9 @@
 import json
 import datetime
 from accounts_info.models import engine
+from rich.console import Console
 
+console = Console()
 
 def alchemyencoder(obj):
     """JSON encoder function for SQLAlchemy special classes."""
@@ -30,7 +32,7 @@ def transaction_list(items):
                     items["list_len"]:
                 trans_offset = items["transaction_len"] - items["alter_list"]
                 e = trans_offset + 1
-                print("t-1")
+                # print("t-1")
             elif items["transaction_len"] > items["alter_list"] + \
                     items["list_len"]:
                 # if items["transaction_len"] - items["alter_list"] >= 0:
@@ -106,11 +108,12 @@ def while_yn(action, entity, account_name):
 
 
 # Currancy check for Create Account, Withdraw/Deposit, Edit Transaction
-def currency(show):
+def currency(show, action):
     message = ''
     while show == 'y':
         print(message)
-        amount = input('Amount: ')
+        amount = input(action + ' amount: ')
+        amount = amount.strip('-')
         if amount.replace('.', '', 1).isdigit() is False:
             message = '\n "The amount must be in digits"'
             show = 'y'
@@ -137,5 +140,5 @@ def go_ahead(statement):
         if approve_it == 'y' or approve_it == 'n':
             pass
         else:
-            print('"' + statement + '? \'y\' or \'n\'"')
+            return
     return approve_it

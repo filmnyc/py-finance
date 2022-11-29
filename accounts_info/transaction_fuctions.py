@@ -6,7 +6,10 @@ from .models import engine, Account, Transaction, db_session
 from sqlalchemy import func
 import json
 from rich import print
+from rich.console import Console
+from rich.table import Table
 
+table = Table()
 
 def alchemyencoder(obj):
     """JSON encoder function for SQLAlchemy special classes."""
@@ -15,8 +18,7 @@ def alchemyencoder(obj):
 
 
 def transaction_list(items):
-    print('Transaction List')
-    print()
+    print(items["data_load"])
     the_balance = '{:.2f}'.format(float(items["account_balance"]))
     print(f"\t{items['account_name']} {the_balance}")
     print()
@@ -33,8 +35,6 @@ def transaction_list(items):
                   items["list_len"]):
                 trans_offset = items["transaction_len"] - items["alter_list"]
                 e = trans_offset + 1
-#            elif (items["transaction_len"] > items["alter_list"] +
-#                  items["list_len"]):
             else:
                 trans_offset = items["transaction_len"] - items["alter_list"]
                 e = trans_offset + 1
@@ -52,90 +52,132 @@ def transaction_list(items):
         transaction_num = items["transaction_num"]
         e = items["transaction_num"]
     transactions = json.loads(transaction_json)
+    the_balance = '{:.2f}'.format(float(items["account_balance"]))
+    # print(f"\t{items['account_name']} {the_balance}")
+    the_title = title=('[bold cyan]"' + items["account_name"] + ' ' + 
+                       the_balance + '"[/]')
+    table = Table(title=the_title)
+    table.add_column("Number", style="bright_yellow")
+    table.add_column("Date", style="aquamarine3")
+    table.add_column("Transaction", style="bold red", justify="right")
+    table.add_column("Amount", justify="right")
+    table.add_column("Comment")
 
     for transact in transactions:
         transact_amount = '{:.2f}'.format(float(transact["amount"]))
         transact_cdate = (datetime.datetime.strptime(transact["cdate"],
                           "%Y-%m-%d").strftime('%m/%d/%Y'))
-        print(f'{e}) {transact_cdate} {transact["action"]} {transact_amount} - \
-"{transact["comment"]}"')
+        table.add_row(f'{e}', f'{transact_cdate}', f'{transact["action"]}', 
+                      f'{transact_amount}', f'{transact["comment"]}')
         e = e + 1
+    console = Console()
+    console.print(table)
+    items.update({"transaction_json": transaction_json, "transaction_num":
+                  transaction_num})
+    return items
 
-    return transaction_json, transaction_num
 
-
-def trans_act(items):
+def trans_act1(items):
     print()
-    transaction_list(items)
+    print('\tmake a ' + items["action"])
     print()
-    print('\tMake a ' + items["menu_option"])
-    print()
-    print('Enter amount for the ' + items["menu_option"])
-    amount = currency('y')
-    amount_show = '{:.2f}'.format(float(amount))
+    print('enter amount for the ' + items["action"])
+    amount = currency('y', items["action"])
+    if items["action"] == "Withdraw":
+        the_amount = float('-' + amount)
+    else:
+        the_amount = float(amount)
+    the_amount_show = '{:.2f}'.format(the_amount)
     trans_time = time.strftime('%m/%d/%Y')
-    new_transaction = (trans_time + ' ' + items["menu_option"] + ' - ' +
-                       amount_show)
-    print(new_transaction)
-    okay_it = go_ahead("If this is okay enter?")
+    items.update({"the_date": trans_time})
+    new_transaction = (items["the_date"] + ' ' + items["action"] + ' ' +
+                       the_amount_show)
+    items.update({"transaction_item": new_transaction, 
+                  "menu_option": "trans_act2", "amount": the_amount})
+    return items
+
+def trans_act2(items):
+    print()
+    print(items["transaction_item"])
+    print()
+    okay_it = go_ahead("if this is okay enter?")
     if okay_it == 'y':
-        pass
+        items.update({"menu_option": "trans_act3"})
+        return items
+    elif okay_it == 'n':
+        items.update({"menu_option": "menu"})
+        return items
     else:
-        system('clear')
-        return 're-edit', 're-edit'
+        the_message = ('[bold red]Please enter either "y" or "n"![/]')
+        items.update({"message_opt": "yes", "message": the_message})
+        return items
+
+def trans_act3(items):
     print()
-    add_comment = go_ahead('Add a comment to this transaction??')
+    print(items["transaction_item"])
+    print()
+    add_comment = go_ahead('Add a comment to this transaction?')
     if add_comment == 'y':
-        print()
-        rec_comment = input('Add comment: ')
-        print()
-        print('The new transaction: ' + trans_time + ' ' + items["menu_option"]
-              + ' - ' + amount_show + ' \"' + rec_comment + '\"')
-    else:
+        items.update({"menu_option": "trans_act4"}) 
+        return items
+    elif add_comment == 'n':
         rec_comment = 'no comment'
-        print()
-        print('The new transaction: ' + trans_time + ' ' + items["menu_option"]
-              + ' - ' + amount_show)
-    old_balance = ((Transaction.query.with_entities(func.sum
-                    (Transaction.amount).filter(Transaction.account_id == items
-                                                ["selected_account"]).label
-                                                ('total')).first().total))
-    amount = float(amount)
-    if old_balance is not None:
-        old_balance = float(old_balance)
+        the_amount_show = '{:.2f}'.format(items["amount"])
+        new_transaction = (items["the_date"] + ' ' + items["action"] + ' ' +
+                                the_amount_show + ' - ' + '\"' + 
+                                rec_comment + '\"')
+        items.update({"menu_option": "trans_act5", "the_comment": rec_comment,
+                      "transaction_item": new_transaction})
+        return items
     else:
-        old_balance = 0.00
-    if items["menu_option"] == 'Deposit':
-        new_balance = old_balance + amount
-    else:
-        new_balance = old_balance - amount
-    new_balance_show = '{:.2f}'.format(float(new_balance))
-    old_balance_show = '{:.2f}'.format(float(old_balance))
+        the_message = ('[bold red]Please enter either "y" or "n"![/]')
+        items.update({"message_opt": "yes", "message": the_message})
+        return items
+
+def trans_act4(items):
     print()
-    print(items["account_name"] + ' balance of ' + old_balance_show + ' will be \
-updated to ' + new_balance_show)
-    if items["menu_option"] == 'Withdraw':
-        db_amount = '-' + str(amount)
-    else:
-        db_amount = amount
+    print(items["transaction_item"])
+    print()
+    rec_comment = input('Add comment: ')
+    the_amount_show = '{:.2f}'.format(items["amount"])
+    new_transaction = (items["the_date"] + ' ' + items["action"]
+          + ' ' + the_amount_show + ' - \"' + rec_comment + '\"')
+    items.update({"menu_option": "trans_act5", "the_comment": rec_comment,
+                  "transaction_item": new_transaction})
+    return items
+
+def trans_act5(items):
+    print()
+    print(items["transaction_item"])
+    print()
     record_it = go_ahead("Record this transaction?")
     if record_it == 'y':
-        trans_time = time.strftime('%m/%d/%Y')
-        db_date = datetime.datetime.strptime(trans_time, '%m/%d/%Y')
-        new_transaction = (Transaction(action=items["menu_option"],
-                           amount=db_amount, cdate=db_date,
-                           comment=rec_comment, account_id=items
+        db_date = datetime.datetime.strptime(items["the_date"], '%m/%d/%Y')
+        new_transaction = (Transaction(action=items["action"],
+                           amount=items["amount"], cdate=db_date,
+                           comment=items["the_comment"], account_id=items
                            ["selected_account"]))
         db_session.add(new_transaction)
         db_session.commit()
-        account_row = Account.query.get(items["selected_account"])
-        account_row.balance = new_balance
+        new_balance = (Transaction.query.with_entities(func.sum(Transaction.
+                       amount).filter(Transaction.account_id == items
+                       ["selected_account"]).label('total')).first().total)
+        the_account = Account.query.get(items["selected_account"])
+        new_balance = round(new_balance, 2)
+        the_account.balance = new_balance
         db_session.commit()
-        system('clear')
-        return new_balance, items["transaction_len"] + 1
+        transaction_len = items["transaction_len"] + 1
+        items.update({"account_balance": new_balance, "data_load": "re-load",
+                      "menu_option": "menu", "transaction_len": 
+                      transaction_len})
+        return items
+    elif add_comment == 'n':
+        items.update({"menu_option": "menu"})
+        return items
     else:
-        system('clear')
-        return 're-edit', 're-edit'
+        the_message = ('[bold red]Please enter either "y" or "n"![/]')
+        items.update({"message_opt": "yes", "message": the_message})
+        return items
 
 
 def select_transaction(items):

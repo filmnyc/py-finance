@@ -6,10 +6,10 @@ import time
 import datetime
 from sqlalchemy import func
 
-
+# from account
 def transfer_one(items):
-    print('Transfer From')
-    print()
+    print('[yellow]Transfer From[/]')
+    print(items["alter_list"])
     if items["account_num"] > 0:
         select_string, str_left, str_right = selector(items)
         if items["account_len"] <= items["alter_list"]:
@@ -26,7 +26,6 @@ def transfer_one(items):
                       from this account", "menu_option": "menu"})
         return items
 
-    # elif items["account_num"] == 'transfer_from':
     print(' Return (r):')
     print()
     selection = input('Make Selection: ')
@@ -44,7 +43,6 @@ def transfer_one(items):
             items.update({"alter_list": new_list, "data_load": "re-load"})
             return items
     elif selection == 'u':
-        # if items["account_num"] == 1:
         if items["alter_list"] == items["list_len"]:
             items.update({"message_opt": "yes", "message": "Wrong direction",
                           "menu_option": "menu"})
@@ -87,7 +85,7 @@ def transfer_one(items):
                       "from_listing": row[1]})
         return items
 
-
+# transfer amount
 def transfer_two(items):
     print('Transfer from ' + items["from_name"] + ' (' + 
           '{:.2f}'.format(float(items["from_balance"])) + ')')
@@ -109,37 +107,32 @@ def transfer_two(items):
             return items
         else:
             items.update({"transfer_amt": transfer_amt, "menu_option":
-                          "transfer_three"})
+                          "transfer_three", "data_load": "re-load"})
             return items
 
     else:
         items.update({"transfer_amt": transfer_amt, "menu_option":
-                      "transfer_three"})
+                      "transfer_three", "data_load": "re-load"})
         return items
 
-
+# transfer to
 def transfer_three(items):
+    print(items["alter_list"])
     print('Transfer from ' + items["from_name"] + ' (' + '{:.2f}'
           .format(float(items["from_balance"])) + ')' + ' for the amount of '
           + ('{:.2f}'.format(float(items["transfer_amt"]))))
     print()
     select_string, str_left, str_right = selector(items)
-    print('Transfer To')
+    print('[yellow]Transfer To[/]')
     print()
     if items["account_len"] <= items["alter_list"]:
         pass
     else:
         print(' Move down (d) ')
-    if items["account_num"] > items["list_len"]:
+    if items["alter_list"] > items["list_len"]:
         print(' Move up (u) ')
     else:
         pass
-
-#        print(' Move down (d) ')
-#    if items["alter_list"] > items["list_len"]:
-#        print(' Move up (u) ')
-#    else:
-#        pass
     print(' Select account ' + select_string)
     print(' Return (r)')
     print()
@@ -205,11 +198,9 @@ def transfer_four(items):
           ["from_balance"])) + ') to ' + items["to_name"] + ' (' + '{:.2f}'
           .format(float(items["to_balance"])) + ')')
     print()
-    print('Transfer')
+    print('[yellow]Transfer[/]')
     print()
-    print(' Make this transfer (y/n)')
-    print()
-    selection = input('Selection: ')
+    selection = input(' Make this transfer (y/n) ')
     if selection == 'y' or selection == 'n':
         pass
     else:
@@ -235,8 +226,6 @@ def transfer_four(items):
                           ["to_account"])) 
         db_session.add(to_transaction)
         db_session.commit()
-        # print(to_transaction.id)
-        # hello = input('hello')
         from_transaction.transfer_id = to_transaction.id
         to_transaction.transfer_id = from_transaction.id
         db_session.add(from_transaction)
@@ -252,8 +241,10 @@ def transfer_four(items):
                         ["to_account"]).label('total')).first().
                        total)
         from_row = Account.query.get(items["from_account"])
+        from_balance = round(from_balance, 2)
         from_row.balance = from_balance
         to_row = Account.query.get(items["to_account"])
+        to_balance = round(to_balance, 2)
         to_row.balance = to_balance
         db_session.commit()
         items.update({"to_balance": to_balance, "from_balance":
@@ -278,6 +269,5 @@ def transfer_five(items):
     items.update({"menu_option": "menu"})
     return items
 
-        # hello = input('hello')
 
 

@@ -1,16 +1,19 @@
 from os import system
 import sys
-from .transaction_fuctions import (trans_act, select_transaction,
-                                   transaction_list)
+from .transaction_fuctions import (select_transaction,
+                                   transaction_list, trans_act1, trans_act2,
+                                   trans_act3, trans_act4, trans_act5)
 from .account_fuctions import (create_account, change_account, account_select,
                                account_list)
 from .transaction_edit import (tedit_menu, edit_one, edit_two, edit_three,
-                               edit_four, edit_five)
+                               edit_four, edit_five, edit_two_show)
 from rich import print
 from applets.applet import selector
 from .models import Account, db_session, engine, Transaction
 from .transfer import (transfer_one, transfer_two, transfer_three,
                       transfer_four, transfer_five)
+from rich.console import Console
+from rich.table import Table
 
 
 def account_menu(items):
@@ -124,84 +127,11 @@ def transfer_menu(items):
         items = transfer_five(items)
         account_menu(items)
     
-        # items.update({"account_listing": row[1]})
-#         if items["account_num"] > 0:
-#             select_string, str_left, str_right = selector(items)
-#             if items["account_len"] <= items["alter_list"]:
-#                 pass
-#             else:
-#                 print(' Move down (d) ')
-#             if items["alter_list"] > items["list_len"]:
-#                 print(' Move up (u) ')
-#             else:
-#                 pass
-#             print(' Account ' + select_string)
-#         else:
-#             pass
-#     elif items["account_num"] == 'transfer_from':
-#     print(' Return (r):')
-#     print()
-#     selection = input('Make Selection: ')
-#     system('clear')
-#     if selection == 'r':
-#         items.update({"menu_option": "menu"})
-#         return items
-#     elif selection == 'd':
-#         if items["alter_list"] >= items["account_len"]:
-#             items.update({"message_opt": "yes", "message": "Wrong direction"})
-#             account_menu(items)
-#         else:
-#             new_list = items["alter_list"] + items["list_len"]
-#             items.update({"alter_list": new_list, "data_load": "re-load"})
-#             account_menu(items)
-#     elif selection == 'u':
-#         if items["alter_list"] == items["list_len"]:
-#             items.update({"message_opt": "yes", "message": "Wrong direction"})
-#             account_menu(items)
-#         else:
-#             new_list = items["alter_list"] - items["list_len"]
-#             items.update({"alter_list": new_list, "data_load": "re-load"})
-#             account_menu(items)
-#     elif selection.isnumeric() is False:
-#         items.update({"message_opt": "yes", "message":
-#                       "\"Submit a number or (r)\""})
-#         return items
-#     elif int(selection) < str_left or int(selection) > str_right:
-#         items.update({"message_opt": "yes", "message":
-#                       "\"Submit number within range\""})
-#         return items
-#     else:
-#         e = items["account_num"]
-#         all_accounts = items["accounts_json"]
-# 
-#         for accounts in all_accounts:
-#             account_amount = '{:.2f}'.format(float(accounts["balance"]))
-#             row = ([e, f'{e}) {accounts["name"]} {account_amount}',
-#                    accounts["id"]])
-#             if row[0] == int(selection):
-#                 break
-#             else:
-#                 e = e + 1
-#         selected_account = row[2]
-#         account_name = accounts["name"]
-#         account_balance = accounts["balance"]
-#         transaction_len = (db_session.query(Transaction).filter_by
-#                            (account_id=selected_account).count())
-#         list_len = items["list_len"]
-#         items.update({"account_name": account_name,
-#                       "account_balance": account_balance, "alter_list":
-#                       list_len,  "transaction_len": transaction_len,
-#                       "selected_account": selected_account, "message_opt":
-#                       "no", "message": " "})
-#         items["menu_option"] == 'Transfer_From'
-#         items.update({"account_listing": row[1]})
-#         return items
-    # if items["menu_option": "transfer_from"]:
 
 def transaction_menu(items):
     system('clear')
     print()
-    transaction_json, transaction_num = transaction_list(items)
+    items = transaction_list(items)
     if items["message_opt"] == 'yes':
         print()
         print(items["message"])
@@ -214,8 +144,6 @@ def transaction_menu(items):
             transaction_menu(items)
         elif items["menu_option"] == 'menu':
             transaction_menu(items)
-        # elif items["menu_option"] == 'edit_menu':
-        #    transaction_edit(items)
     elif items["menu_option"] == 'selected':
         select_transaction(items)
         transaction_edit(items)
@@ -259,42 +187,16 @@ def transaction_menu(items):
             transaction_menu(items)
     elif change == "e":
         system('clear')
-        items.update({"data_load": "load", "transaction_json":
-                      transaction_json, "transaction_num":
-                      transaction_num, "menu_option": "select"})
+        items.update({"menu_option": "select"})
         transaction_menu(items)
     elif change == "a":
-        system('clear')
-        items.update({"transaction_json": transaction_json, "transaction_num":
-                      transaction_num, "menu_option": "Deposit"})
-        new_balance, transaction_len = trans_act(items)
-        if new_balance == 're-edit':
-            items.update({"menu_option": "menu"})
-            transaction_menu(items)
-        else:
-            items.update({"data_load": "re-load", "menu_option": "menu",
-                          "account_balance": new_balance, "transaction_len":
-                          transaction_len})
-            transaction_menu(items)
+        items.update({"action": "Deposit", "menu_option": "trans_act1"})
+        items = trans_act(items)
     elif change == "w":
-        system('clear')
-        items.update({"transaction_json": transaction_json, "transaction_num":
-                      transaction_num, "menu_option": "Withdraw"})
-        new_balance, transaction_len = trans_act(items)
-        if new_balance == 're-edit':
-            items.update({"menu_option": "menu"})
-            transaction_menu(items)
-        else:
-            items.update({"data_load": "re-load", "menu_option": "menu",
-                          "account_balance": new_balance, "transaction_len":
-                          transaction_len})
-            transaction_menu(items)
+        items.update({"action": "Withdraw", "menu_option": "trans_act1"})
+        items = trans_act(items)
     elif change == "m":
-        system('clear')
-        list_len = items["list_len"]
-        items = {"data_load": "re-load", "alter_list": list_len,
-                 "message_opt": "no", "message": ' ', "menu_option": "menu",
-                 "list_len": list_len}
+        items.update({"data_load": "re-load", "menu_option": "menu",})
         account_menu(items)
     elif change == "q":
         print("\nExiting...")
@@ -305,6 +207,37 @@ def transaction_menu(items):
         print(items["message"])
         transaction_menu(items)
 
+def trans_act(items):
+    system('clear')
+    print()
+    items = transaction_list(items)
+    print()
+    if items["message_opt"] == "yes":
+        print()
+        print(items["message"])
+        print()
+        items.update({"message_opt": "no"})
+    else:
+        pass
+    if items["menu_option"] == "trans_act1":
+        items = trans_act1(items)
+        trans_act(items)
+    if items["menu_option"] == "trans_act2":
+        items = trans_act2(items)
+        trans_act(items)
+    if items["menu_option"] == "trans_act3":
+        items = trans_act3(items)
+        trans_act(items)
+    if items["menu_option"] == "trans_act4":
+        items = trans_act4(items)
+        trans_act(items)
+    if items["menu_option"] == "trans_act5":
+        items = trans_act5(items)
+        transaction_menu(items)
+    if items["menu_option"] == "menu":
+        transaction_menu(items)
+
+    
 
 # Edit transaction menu
 def transaction_edit(items):
@@ -315,83 +248,36 @@ def transaction_edit(items):
     print()
     if items["message_opt"] == "yes":
         print(items["message"])
+        print()
         items.update({"message_opt": "no"})
     if items["menu_option"] == 'edit_menu':
-        edit_select = tedit_menu(items)
-        items.update({"menu_option": edit_select})
-        system('clear')
+        items = tedit_menu(items)
         transaction_edit(items)
     if items["menu_option"] == '1':
-        new_date = edit_one(items)
-        if new_date == 're-edit':
-            system('clear')
-            items.update({"menu_option": "edit_menu"})
-            transaction_edit(items)
-        else:
-            system('clear')
-            items.update({"data_load": "re-load"})
-            items.update({"menu_option": "edit_menu"})
-            items.update({"transaction_item": new_date})
-            transaction_edit(items)
+        items = edit_one(items)
+        transaction_edit(items)
     elif items["menu_option"] == '2':
-        new_transaction, new_balance = edit_two(items)
-        if new_transaction == 're-edit':
-            system('clear')
-            items.update({"menu_option": "edit_menu"})
-            transaction_edit(items)
-        else:
-            system('clear')
-            items.update({"transaction_item": new_transaction})
-            items.update({"account_balance": new_balance})
-            items.update({"data_load": "re-load"})
-            items.update({"menu_option": "edit_menu"})
-            transaction_edit(items)
+        items = edit_two(items)
+        transaction_edit(items)
+    elif items["menu_option"] == '2_show':
+        items = edit_two_show(items)
+        transaction_edit(items)
 
     # change amount
     elif items["menu_option"] == '3':
-        new_transaction, new_balance = edit_three(items)
-        if new_transaction == 're-edit':
-            system('clear')
-            items.update({"menu_option": "edit_menu"})
-            transaction_edit(items)
-        else:
-            system('clear')
-            items.update({"transaction_item": new_transaction})
-            items.update({"account_balance": new_balance})
-            items.update({"data_load": "re-load"})
-            items.update({"menu_option": "edit_menu"})
-            transaction_edit(items)
+        items = edit_three(items)
+        system('clear')
+        transaction_edit(items)
 
     # edit commnet
     elif items["menu_option"] == '4':
-        transaction_update = edit_four(items)
-        if transaction_update == 're-edit':
-            system('clear')
-            items.update({"menu_option": "edit_menu"})
-            transaction_edit(items)
-        else:
-            system('clear')
-            items.update({"transaction_item": transaction_update})
-            items.update({"data_load": "re-load"})
-            items.update({"menu_option": "edit_menu"})
-            transaction_edit(items)
+        items = edit_four(items)
+        transaction_edit(items)
 
     # delete transaction
     elif items["menu_option"] == '5':
         items = edit_five(items)
-        transaction_edit(items)
-
-#        if new_balance == 're-edit':
-#            system('clear')
-#            items.update({"menu_option": "edit_menu"})
-#            transaction_edit(items)
-#        else:
-#            system('clear')
-#            transaction_len = items["transaction_len"] - 1
-#            items.update({"data_load": "re-load"})
-#            items.update({"account_balance": new_balance})
-#            items.update({"transaction_len": transaction_len})
-#            transaction_menu(items)
+        transaction_menu(items)
 
     # return to menu
     elif items["menu_option"] == '6':

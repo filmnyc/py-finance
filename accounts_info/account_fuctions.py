@@ -3,6 +3,8 @@ from .models import Account, db_session, engine, Transaction
 from applets.applet import go_ahead, selector
 import json
 from rich import print
+from rich.console import Console
+from rich.table import Table
 
 
 def account_list(items):
@@ -37,10 +39,17 @@ def account_list(items):
         e = items["account_num"]
         all_accounts_json = items["accounts_json"]
 
+    table = Table(title="Account List")
+    table.add_column("Number")
+    table.add_column("Account")
+    table.add_column("Balance")
+
     for account in all_accounts_json:
         account_amount = '{:.2f}'.format(float(account["balance"]))
-        print(f'{e}) {account["name"]} {account_amount}')
+        table.add_row(f'{e}', f'{account["name"]}', f'{account_amount}')
         e = e + 1
+    console = Console()
+    console.print(table)
     all_accounts_len = db_session.query(Account).count()
 
     items.update({"data_load": "load", "accounts_json": all_accounts_json,
