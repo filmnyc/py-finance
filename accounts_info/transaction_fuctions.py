@@ -171,7 +171,7 @@ def trans_act5(items):
                       "menu_option": "menu", "transaction_len": 
                       transaction_len})
         return items
-    elif add_comment == 'n':
+    elif record_it == 'n':
         items.update({"menu_option": "menu"})
         return items
     else:
