@@ -339,6 +339,8 @@ def edit_five(items):
                        (func.sum(Transaction.amount).filter(Transaction.
                        account_id == the_transaction.account_id)
                        .label('total')).first().total)
+        if the_balance == None:
+            the_balance = 0.0
         the_account.balance = the_balance
         db_session.commit()
         the_balance_show = '{:.2f}'.format(float(the_balance))
