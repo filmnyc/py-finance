@@ -2,6 +2,7 @@ from os import system
 import time
 import datetime
 from applets.applet import currency, go_ahead
+from .transaction_edit import date_maker
 from .models import engine, Account, Transaction, db_session
 from sqlalchemy import func
 import json
@@ -54,14 +55,14 @@ def transaction_list(items):
     transactions = json.loads(transaction_json)
     the_balance = '{:.2f}'.format(float(items["account_balance"]))
     # print(f"\t{items['account_name']} {the_balance}")
-    the_title = title=('[bold cyan]"' + items["account_name"] + ' ' + 
+    the_title = title=('[aquamarine3]"' + items["account_name"] + ' ' + 
                        the_balance + '"[/]')
     table = Table(title=the_title)
     table.add_column("Number", style="bright_yellow")
     table.add_column("Date", style="aquamarine3")
-    table.add_column("Transaction", style="bold red", justify="right")
-    table.add_column("Amount", justify="right")
-    table.add_column("Comment")
+    table.add_column("Transaction", style="bright_yellow", justify="right")
+    table.add_column("Amount", justify="right", style="aquamarine3")
+    table.add_column("Comment", style="bright_yellow")
 
     for transact in transactions:
         transact_amount = '{:.2f}'.format(float(transact["amount"]))
@@ -76,10 +77,40 @@ def transaction_list(items):
                   transaction_num})
     return items
 
-
-def trans_act1(items):
+def trans_act1a(items):
     print()
-    print('\tmake a ' + items["action"])
+    okay_it = go_ahead("Make a " + items['action'])
+    if okay_it == 'n':
+        items.update({"menu_option": "menu"})
+        return items
+    else:
+        items.update({"menu_option": "trans_act1b"})
+        return items
+
+def trans_act1b(items):
+    print()
+    trans_time = time.strftime('%m/%d/%Y')
+    okay_it = go_ahead("Enter This Date: " + trans_time)
+    if okay_it == 'y':
+        items.update({"menu_option": "trans_act1d", "the_date": trans_time})
+    else:
+        items.update({"menu_option": "trans_act1c"})
+    return items
+
+def trans_act1c(items):
+    print()
+    print("Enter Date:\n")
+    print()
+    the_date = date_maker('month')
+    print(the_date)
+    okay_it = go_ahead("Is this okay? ")
+    if okay_it == 'y':
+        items.update({"menu_option": "trans_act1d", "the_date": the_date})
+    else:
+        items.update({"menu_option": "menu"})
+    return items
+
+def trans_act1d(items):
     print()
     print('enter amount for the ' + items["action"])
     amount = currency('y', items["action"])
@@ -88,8 +119,8 @@ def trans_act1(items):
     else:
         the_amount = float(amount)
     the_amount_show = '{:.2f}'.format(the_amount)
-    trans_time = time.strftime('%m/%d/%Y')
-    items.update({"the_date": trans_time})
+#    trans_time = time.strftime('%m/%d/%Y')
+#    items.update({"the_date": trans_time})
     new_transaction = (items["the_date"] + ' ' + items["action"] + ' ' +
                        the_amount_show)
     items.update({"transaction_item": new_transaction, 

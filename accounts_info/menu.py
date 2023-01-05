@@ -1,8 +1,9 @@
 from os import system
 import sys
 from .transaction_fuctions import (select_transaction,
-                                   transaction_list, trans_act1, trans_act2,
-                                   trans_act3, trans_act4, trans_act5)
+                                   transaction_list, trans_act1a,
+                                   trans_act1b, trans_act1c, trans_act1d,
+                                   trans_act2, trans_act3, trans_act4, trans_act5)
 from .account_fuctions import (create_account, change_account, account_select,
                                account_list)
 from .transaction_edit import (tedit_menu, edit_one, edit_two, edit_three,
@@ -190,10 +191,10 @@ def transaction_menu(items):
         items.update({"menu_option": "select"})
         transaction_menu(items)
     elif change == "a":
-        items.update({"action": "Deposit", "menu_option": "trans_act1"})
+        items.update({"action": "Deposit", "menu_option": "trans_act1a"})
         items = trans_act(items)
     elif change == "w":
-        items.update({"action": "Withdraw", "menu_option": "trans_act1"})
+        items.update({"action": "Withdraw", "menu_option": "trans_act1a"})
         items = trans_act(items)
     elif change == "m":
         items.update({"data_load": "re-load", "menu_option": "menu",})
@@ -219,8 +220,17 @@ def trans_act(items):
         items.update({"message_opt": "no"})
     else:
         pass
-    if items["menu_option"] == "trans_act1":
-        items = trans_act1(items)
+    if items["menu_option"] == "trans_act1a":
+        items = trans_act1a(items)
+        trans_act(items)
+    if items["menu_option"] == "trans_act1b":
+        items = trans_act1b(items)
+        trans_act(items)
+    if items["menu_option"] == "trans_act1c":
+        items = trans_act1c(items)
+        trans_act(items)
+    if items["menu_option"] == "trans_act1d":
+        items = trans_act1d(items)
         trans_act(items)
     if items["menu_option"] == "trans_act2":
         items = trans_act2(items)
